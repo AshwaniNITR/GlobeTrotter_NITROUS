@@ -45,6 +45,7 @@ export async function GET(request: NextRequest) {
       }
       return NextResponse.redirect(new URL('/auth/verification-failed?error=invalid_token_type', request.url));
     }
+    
 
     // Find and update user
     const user = await User.findById(decoded.userId) as UserDocument | null;
@@ -95,13 +96,13 @@ async function generateAndSetTokens(user: UserDocument): Promise<TokenPair> {
   const accessToken = jwt.sign(
     { userId: user._id.toString(), email: user.email },
     process.env.ACCESS_TOKEN_SECRET!,
-    { expiresIn: '15m' }
+    { expiresIn: '7d' }
   );
 
   const refreshToken = jwt.sign(
     { userId: user._id.toString() },
     process.env.REFRESH_TOKEN_SECRET!,
-    { expiresIn: '7d' }
+    { expiresIn: '30d' }
   );
 
   user.refreshToken = refreshToken;
@@ -122,17 +123,17 @@ function createAuthResponse(
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: 15 * 60,
-    path: '/',
-  });
-
-  response.cookies.set('refreshToken', refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
     maxAge: 7 * 24 * 60 * 60,
     path: '/',
   });
+
+  // response.cookies.set('Token', refreshToken, {
+  //   httpOnly: true,
+  //   secure: process.env.NODE_ENV === 'production',
+  //   sameSite: 'lax',
+  //   maxAge: 7 * 24 * 60 * 60,
+  //   path: '/',
+  // });
 
   return response;
 }

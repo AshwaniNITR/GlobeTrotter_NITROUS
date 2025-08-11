@@ -77,7 +77,7 @@ export async function POST(request: Request) {
       existingUser.refreshToken = refreshToken;
       await existingUser.save();
 
-      // Set refresh token as httpOnly cookie
+      // Set access token as httpOnly cookie
       const response = NextResponse.json({
         success: true,
         message: 'Google login successful',
@@ -91,12 +91,15 @@ export async function POST(request: Request) {
         }
       });
 
-      response.cookies.set('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-      });
+     response.cookies.set('accessToken', accessToken, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict',
+  maxAge: 7 * 24 * 60 * 60, // seconds, not ms
+  path: '/',
+  domain: process.env.NODE_ENV === 'production' ? '.vercel.app' : undefined
+});
+
 
       return response;
 
@@ -188,12 +191,20 @@ export async function POST(request: Request) {
         }
       });
 
-      response.cookies.set('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-      });
+      // response.cookies.set('accessToken', accessToken, {
+      //   httpOnly: true,
+      //   secure: process.env.NODE_ENV === 'production',
+      //   sameSite: 'strict',
+      //   maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      // });
+      response.cookies.set('accessToken', accessToken, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict',
+  maxAge: 7 * 24 * 60 * 60, // seconds
+  path: '/', // important so all routes can access it
+});
+
 
       return response;
     }
