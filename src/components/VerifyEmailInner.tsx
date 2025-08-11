@@ -41,7 +41,7 @@ export default function VerifyEmailInner() {
         // Redirect after delay
         setTimeout(() => {
           // Use window.location for full page reload to ensure cookies are read
-          window.location.href = data.redirectTo || '/';
+          window.location.href = data.redirectTo || '/dashboard';
         }, 3000);
 
       } catch (err) {

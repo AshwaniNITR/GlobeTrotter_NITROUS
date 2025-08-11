@@ -164,6 +164,7 @@ export default function SignupPage() {
 
       const data = await response.json();
       console.log('Registration successful, Check your mail:', data);
+      localStorage.setItem("userEmail", formData.email);
       
       setSuccess(true);
 
