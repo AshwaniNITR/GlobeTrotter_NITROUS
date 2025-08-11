@@ -21,6 +21,7 @@ type TripData = {
 
 type TripSection = {
   id: string;
+  _id?: string; // For MongoDB's auto-generated ID
   place: string;
   budget: number;
   daysToStay: number;
@@ -33,39 +34,71 @@ export default function TripDetailsPage() {
   const [tripData, setTripData] = useState<TripData | null>(null);
   const [totalDays, setTotalDays] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
 
   useEffect(() => {
-    const savedTripData = localStorage.getItem('completeTripData');
-    const savedSelectedPlaces = localStorage.getItem('selectedPlaces');
-    
-    let parsedTripData: TripData | null = null;
-    let parsedSelectedPlaces: SelectedPlace[] = [];
+    const loadTripData = async () => {
+      try {
+        // Load from localStorage first (fallback)
+        const savedTripData = localStorage.getItem('completeTripData');
+        const savedSelectedPlaces = localStorage.getItem('selectedPlaces');
+        
+        let parsedTripData: TripData | null = null;
+        let parsedSelectedPlaces: SelectedPlace[] = [];
 
-    try {
-      if (savedTripData) {
-        parsedTripData = JSON.parse(savedTripData);
-      }
-      if (savedSelectedPlaces) {
-        parsedSelectedPlaces = JSON.parse(savedSelectedPlaces);
+        if (savedTripData) {
+          parsedTripData = JSON.parse(savedTripData);
+          setTripData(parsedTripData);
+          setTotalDays(parsedTripData?.numberOfDays || 0);
+        }
+
+        if (savedSelectedPlaces) {
+          parsedSelectedPlaces = JSON.parse(savedSelectedPlaces);
+          const sections: TripSection[] = parsedSelectedPlaces.map((place, index) => ({
+            id: `section-${index + 1}`,
+            place: place.name,
+            budget: place.budget,
+            daysToStay: 1,
+            dateRange: `Day ${index + 1}`,
+            isEditable: false
+          }));
+          setTripSections(sections);
+        }
+
+        // Try to load from database if we have a trip ID in URL
+         const tripId = new URLSearchParams(window.location.search).get('id');
+      if (tripId) {
+        const response = await fetch(`/api/trips?id=${tripId}`);
+        if (response.ok) {
+          const dbTrip = await response.json();
+          if (dbTrip) {
+            setTripData({
+              place: dbTrip.destination,
+              startDate: dbTrip.startDate,
+              endDate: dbTrip.endDate,
+              numberOfDays: dbTrip.totalDays,
+              totalBudget: dbTrip.totalBudget
+            });
+            setTotalDays(dbTrip.totalDays);
+            setTripSections(dbTrip.sections.map((section: TripSection) => ({
+              id: section._id || `section-${Date.now()}`, // Use MongoDB _id if available
+              place: section.place,
+              budget: section.budget,
+              daysToStay: section.daysToStay,
+              dateRange: section.dateRange,
+              isEditable: section.isEditable || false
+            })));
+          }
+        }
       }
     } catch (error) {
-      console.error("Error parsing saved data:", error);
+      console.error('Error loading trip data:', error);
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    setTripData(parsedTripData);
-    setTotalDays(parsedTripData?.numberOfDays || 0);
-
-    const sections: TripSection[] = parsedSelectedPlaces.map((place, index) => ({
-      id: `section-${index + 1}`,
-      place: place.name,
-      budget: place.budget,
-      daysToStay: 1,
-      dateRange: `Day ${index + 1}`,
-      isEditable: false
-    }));
-    
-    setTripSections(sections);
-    setIsLoading(false);
+  loadTripData();
   }, []);
 
   const handleDaysChange = (sectionId: string, days: number) => {
@@ -122,24 +155,72 @@ export default function TripDetailsPage() {
     return tripSections.reduce((sum, section) => sum + section.budget, 0);
   };
 
-  const handleSavePlan = () => {
-    if (!tripData) return;
+  const handleSavePlan = async () => {
+  if (!tripData) return;
 
-    const updatedTripData: TripData = {
+  setSaveStatus('saving');
+  try {
+    // Prepare the trip data for MongoDB with proper types
+    const tripPayload = {
+      destination: tripData.place,
+      startDate: new Date(tripData.startDate),
+      endDate: new Date(tripData.endDate),
+      totalDays: tripData.numberOfDays,
+      totalBudget: getTotalBudget(),
+      sections: tripSections.map((section: TripSection) => ({
+        name: section.place,
+        budget: section.budget,
+        daysToStay: section.daysToStay,
+        dateRange: section.dateRange,
+        isEditable: section.isEditable
+      })),
+      userEmail: localStorage.getItem('userEmail') || undefined
+    };
+
+    // Determine if we're updating an existing trip or creating new
+    const tripId = new URLSearchParams(window.location.search).get('id');
+    const url = tripId ? `/api/trips?id=${tripId}` : '/api/trips';
+    const method = tripId ? 'PUT' : 'POST';
+
+    const response = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(tripPayload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json() as { error?: string };
+      throw new Error(errorData.error || 'Failed to save trip');
+    }
+
+    const result = await response.json() as { tripId?: string };
+
+    setSaveStatus('success');
+    localStorage.removeItem('completeTripData');
+    localStorage.removeItem('selectedPlaces');
+    
+    if (!tripId && result.tripId) {
+      window.history.pushState({}, '', `?id=${result.tripId}`);
+    }
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to save trip';
+    console.error('Error saving trip:', errorMessage);
+    setSaveStatus('error');
+    localStorage.setItem('detailedTripPlan', JSON.stringify({
       ...tripData,
       sections: tripSections,
       totalPlannedDays: getTotalPlannedDays(),
       totalSectionBudget: getTotalBudget()
-    };
-
-    localStorage.setItem('detailedTripPlan', JSON.stringify(updatedTripData));
-    
-    console.log('Detailed Trip Plan Saved:', updatedTripData);
-    alert('Trip plan saved successfully!');
-  };
+    }));
+  } finally {
+    setTimeout(() => setSaveStatus('idle'), 3000);
+  }
+};
 
   const handleGoBack = () => {
-    alert('In your actual app, this would navigate back to the previous page');
+    window.history.back();
   };
 
   if (isLoading) {
@@ -159,6 +240,7 @@ export default function TripDetailsPage() {
             <button 
               onClick={handleGoBack}
               className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+              aria-label="Go back"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -175,6 +257,18 @@ export default function TripDetailsPage() {
             </span>
           </div>
         </div>
+
+        {/* Status Messages */}
+        {saveStatus === 'success' && (
+          <div className="mb-4 p-3 bg-green-800/50 text-green-200 rounded-lg">
+            Trip saved successfully!
+          </div>
+        )}
+        {saveStatus === 'error' && (
+          <div className="mb-4 p-3 bg-red-800/50 text-red-200 rounded-lg">
+            Failed to save trip. Saved to local storage as fallback.
+          </div>
+        )}
 
         {/* Trip Overview */}
         {tripData && (
@@ -218,6 +312,7 @@ export default function TripDetailsPage() {
                     onClick={() => removeSection(section.id)}
                     className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors"
                     title="Remove section"
+                    aria-label={`Remove section ${index + 1}`}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -227,13 +322,14 @@ export default function TripDetailsPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Place Name */}
                 <div className="space-y-2">
-                  <label className="block text-gray-400 text-sm font-medium">
+                  <label htmlFor={`place-${section.id}`} className="block text-gray-400 text-sm font-medium">
                     Place/Activity
                   </label>
                   {section.isEditable ? (
                     <div className="relative">
                       <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                       <input
+                        id={`place-${section.id}`}
                         type="text"
                         value={section.place}
                         onChange={(e) => handlePlaceChange(section.id, e.target.value)}
@@ -251,13 +347,14 @@ export default function TripDetailsPage() {
 
                 {/* Budget */}
                 <div className="space-y-2">
-                  <label className="block text-gray-400 text-sm font-medium">
+                  <label htmlFor={`budget-${section.id}`} className="block text-gray-400 text-sm font-medium">
                     Budget of this section
                   </label>
                   {section.isEditable ? (
                     <div className="relative">
                       <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                       <input
+                        id={`budget-${section.id}`}
                         type="number"
                         min="0"
                         value={section.budget}
@@ -276,12 +373,13 @@ export default function TripDetailsPage() {
 
                 {/* Days to Stay */}
                 <div className="space-y-2">
-                  <label className="block text-gray-400 text-sm font-medium">
+                  <label htmlFor={`days-${section.id}`} className="block text-gray-400 text-sm font-medium">
                     Days to stay
                   </label>
                   <div className="relative">
                     <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
+                      id={`days-${section.id}`}
                       type="number"
                       min="1"
                       value={section.daysToStay}
@@ -309,6 +407,7 @@ export default function TripDetailsPage() {
           <button
             onClick={addNewSection}
             className="flex items-center gap-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-600 hover:border-gray-500 rounded-lg text-white font-medium transition-colors"
+            aria-label="Add new section"
           >
             <Plus className="w-5 h-5" />
             Add another Section
@@ -341,10 +440,18 @@ export default function TripDetailsPage() {
         <div className="mt-8 flex justify-center gap-4">
           <button
             onClick={handleSavePlan}
-            className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl"
+            disabled={saveStatus === 'saving'}
+            className={`flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl ${saveStatus === 'saving' ? 'opacity-70 cursor-not-allowed' : ''}`}
+            aria-label="Save trip plan"
           >
-            <Save className="w-5 h-5" />
-            Save Trip Plan
+            {saveStatus === 'saving' ? (
+              <span className="animate-pulse">Saving...</span>
+            ) : (
+              <>
+                <Save className="w-5 h-5" />
+                Save Trip Plan
+              </>
+            )}
           </button>
         </div>
       </div>
