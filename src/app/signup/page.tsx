@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import type { CredentialResponse } from "@react-oauth/google";
+import { FiSearch, FiPlus, FiCompass, FiMap, FiHeart, FiUser, FiHome, FiChevronDown } from "react-icons/fi";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -231,36 +232,113 @@ export default function SignupPage() {
 
   return (
     <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-lg">
-          <div className="flex justify-center mb-6">
-            <div 
-              className="relative w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center border-2 border-dashed border-gray-300 cursor-pointer hover:border-gray-400 transition-all duration-200 group overflow-hidden"
-              onClick={handleImageClick}
-            >
-              {imagePreview ? (
-                <>
-                  <img
-                    src={imagePreview}
-                    alt="Profile preview"
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      resetImage();
-                    }}
-                    className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
-                  >
-                    ×
-                  </button>
-                </>
-              ) : (
-                <div className="text-center">
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-700 to-purple-500 flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-3/4 right-1/4 w-96 h-96 bg-purple-300/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute bottom-1/4 left-1/2 w-48 h-48 bg-white/5 rounded-full blur-2xl animate-pulse delay-500"></div>
+        </div>
+
+        <div className="w-full max-w-lg bg-white/95 backdrop-blur-lg p-8 rounded-3xl shadow-2xl border border-white/20 relative z-10 transform transition-all duration-500 hover:shadow-purple-500/25">
+          {/* Profile Image Section */}
+          <div className="flex justify-center mb-8">
+            <div className="relative">
+              <div 
+                className="relative w-28 h-28 rounded-full bg-gradient-to-r from-purple-400 to-purple-600 flex items-center justify-center border-4 border-white shadow-xl cursor-pointer hover:shadow-2xl hover:scale-105 transition-all duration-300 group overflow-hidden"
+                onClick={handleImageClick}
+              >
+                {imagePreview ? (
+                  <>
+                    <img
+                      src={imagePreview}
+                      alt="Profile preview"
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        resetImage();
+                      }}
+                      className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm hover:from-red-600 hover:to-pink-600 transition-all transform hover:scale-110 shadow-lg"
+                    >
+                      ×
+                    </button>
+                  </>
+                ) : (
+                  <div className="text-center text-white">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-10 w-10 mx-auto mb-1 group-hover:scale-110 transition-transform"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                      />
+                    </svg>
+                    <span className="text-xs font-medium">
+                      Add Photo
+                    </span>
+                  </div>
+                )}
+                
+                {imageUploading && (
+                  <div className="absolute inset-0 bg-purple-900/50 rounded-full flex items-center justify-center">
+                    <svg
+                      className="animate-spin h-8 w-8 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                  </div>
+                )}
+              </div>
+              
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                onChange={handleImageChange}
+                className="hidden"
+                key={imagePreview ? 'with-image' : 'no-image'}
+              />
+            </div>
+          </div>
+
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
+              Registration Screen
+            </h1>
+            <div className="w-24 h-1 bg-gradient-to-r from-purple-400 to-purple-600 mx-auto rounded-full"></div>
+          </div>
+
+          {success ? (
+            <div className="text-center">
+              <div className="mb-4 p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border border-green-200 shadow-lg">
+                <div className="w-16 h-16 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full mx-auto mb-4 flex items-center justify-center shadow-xl">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-8 w-8 text-gray-500 mx-auto mb-1 group-hover:text-gray-600"
+                    className="h-8 w-8 text-white"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -269,76 +347,14 @@ export default function SignupPage() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  <span className="text-xs text-gray-500 group-hover:text-gray-600">
-                    Add Photo
-                  </span>
                 </div>
-              )}
-              
-              {imageUploading && (
-                <div className="absolute inset-0 bg-gray-900/20 rounded-full flex items-center justify-center">
-                  <svg
-                    className="animate-spin h-6 w-6 text-gray-600"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                </div>
-              )}
-            </div>
-            
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-              onChange={handleImageChange}
-              className="hidden"
-              key={imagePreview ? 'with-image' : 'no-image'} // Force re-render to clear input
-            />
-          </div>
-
-          <h1 className="text-2xl font-bold text-center text-gray-800 mb-2">
-            Registration Screen
-          </h1>
-
-          {success ? (
-            <div className="text-center">
-              <div className="mb-4 p-4 bg-green-100 rounded-lg border border-green-200">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-12 w-12 text-green-500 mx-auto mb-3"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">
                   Registration Successful
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-gray-600 font-medium">
                   Your account has been created successfully.
                 </p>
               </div>
@@ -346,50 +362,47 @@ export default function SignupPage() {
           ) : (
             <>
               {error && (
-                <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm border border-red-200 flex items-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2 flex-shrink-0"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span>{error}</span>
+                <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-pink-50 text-red-700 rounded-2xl text-sm border border-red-200 shadow-lg flex items-center">
+                  <div className="w-6 h-6 bg-gradient-to-r from-red-400 to-pink-500 rounded-full mr-3 flex items-center justify-center flex-shrink-0">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-3 w-3 text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                  <span className="font-medium">{error}</span>
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                   <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
-        <input
-          type="text"
-          name="username"
-          value={formData.username}
-          onChange={handleChange}
-          required
-          className="w-full px-3 py-2 text-black bg-gray-50 border border-gray-300 rounded-md"
-          placeholder="Choose a username"
-        />
-      </div>
-
-                 
-                </div>
-
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label
-                      htmlFor="email"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      Email Address
+                    <label className="block text-sm font-bold text-purple-700 mb-2">
+                      Username <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="username"
+                      value={formData.username}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 text-gray-800 bg-purple-50/50 border-2 border-purple-200 rounded-xl focus:outline-none focus:border-purple-500 focus:bg-white transition-all duration-300 hover:border-purple-300"
+                      placeholder="Choose a username"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-bold text-purple-700 mb-2">
+                      Email Address <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="email"
@@ -398,16 +411,15 @@ export default function SignupPage() {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full px-3 py-2 text-black bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-3 text-gray-800 bg-purple-50/50 border-2 border-purple-200 rounded-xl focus:outline-none focus:border-purple-500 focus:bg-white transition-all duration-300 hover:border-purple-300"
                       placeholder="your@email.com"
                     />
                   </div>
+                </div>
 
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label
-                      htmlFor="phone"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
+                    <label htmlFor="phone" className="block text-sm font-bold text-purple-700 mb-2">
                       Phone Number
                     </label>
                     <input
@@ -416,18 +428,13 @@ export default function SignupPage() {
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 text-black bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-3 text-gray-800 bg-purple-50/50 border-2 border-purple-200 rounded-xl focus:outline-none focus:border-purple-500 focus:bg-white transition-all duration-300 hover:border-purple-300"
                       placeholder="Phone Number"
                     />
                   </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label
-                      htmlFor="city"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
+                    <label htmlFor="city" className="block text-sm font-bold text-purple-700 mb-2">
                       City
                     </label>
                     <input
@@ -436,35 +443,29 @@ export default function SignupPage() {
                       name="city"
                       value={formData.city}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 text-black bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-3 text-gray-800 bg-purple-50/50 border-2 border-purple-200 rounded-xl focus:outline-none focus:border-purple-500 focus:bg-white transition-all duration-300 hover:border-purple-300"
                       placeholder="City"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="country"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      Country
-                    </label>
-                    <input
-                      type="text"
-                      id="country"
-                      name="country"
-                      value={formData.country}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 text-black bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Country"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="password"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
+                  <label htmlFor="country" className="block text-sm font-bold text-purple-700 mb-2">
+                    Country
+                  </label>
+                  <input
+                    type="text"
+                    id="country"
+                    name="country"
+                    value={formData.country}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 text-gray-800 bg-purple-50/50 border-2 border-purple-200 rounded-xl focus:outline-none focus:border-purple-500 focus:bg-white transition-all duration-300 hover:border-purple-300"
+                    placeholder="Country"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="password" className="block text-sm font-bold text-purple-700 mb-2">
                     Password <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -475,42 +476,16 @@ export default function SignupPage() {
                     onChange={handleChange}
                     required
                     minLength={6}
-                    className="w-full px-3 py-2 text-black bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-4 py-3 text-gray-800 bg-purple-50/50 border-2 border-purple-200 rounded-xl focus:outline-none focus:border-purple-500 focus:bg-white transition-all duration-300 hover:border-purple-300"
                     placeholder="Enter your password"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-purple-600 mt-2 font-medium">
                     Password must be at least 6 characters long
                   </p>
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="password"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                    minLength={6}
-                    className="w-full px-3 py-2 text-black bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter your password"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Password must be at least 6 characters long
-                  </p>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="additionalInfo"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
+                  <label htmlFor="additionalInfo" className="block text-sm font-bold text-purple-700 mb-2">
                     Additional Information
                   </label>
                   <textarea
@@ -519,7 +494,7 @@ export default function SignupPage() {
                     value={formData.additionalInfo}
                     onChange={handleChange}
                     rows={3}
-                    className="w-full px-3 py-2 text-black bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-vertical"
+                    className="w-full px-4 py-3 text-gray-800 bg-purple-50/50 border-2 border-purple-200 rounded-xl focus:outline-none focus:border-purple-500 focus:bg-white transition-all duration-300 hover:border-purple-300 resize-vertical"
                     placeholder="Additional information..."
                   />
                 </div>
@@ -527,14 +502,14 @@ export default function SignupPage() {
                 <button
                   type="submit"
                   disabled={loading || imageUploading}
-                  className={`w-full py-2 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors ${
-                    loading || imageUploading ? "opacity-70 cursor-not-allowed" : ""
+                  className={`w-full py-4 px-6 rounded-2xl shadow-xl text-lg font-bold text-white bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 hover:from-purple-700 hover:via-purple-800 hover:to-purple-900 focus:outline-none focus:ring-4 focus:ring-purple-300 transform hover:scale-[1.02] transition-all duration-300 ${
+                    loading || imageUploading ? "opacity-70 cursor-not-allowed scale-100" : ""
                   }`}
                 >
                   {loading ? (
                     <span className="flex items-center justify-center">
                       <svg
-                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -556,42 +531,44 @@ export default function SignupPage() {
                       {imageUploading ? "Processing Image..." : "Registering..."}
                     </span>
                   ) : (
-                    "Register"
+                    "Create Account"
                   )}
                 </button>
               </form>
 
-              <div className="mt-6">
+              <div className="mt-8">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300"></div>
+                    <div className="w-full border-t-2 border-purple-200"></div>
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-gray-500">
+                    <span className="px-4 bg-white text-purple-600 font-bold">
                       Or register with
                     </span>
                   </div>
                 </div>
 
                 <div className="mt-6">
-                  <GoogleLogin
-                    onSuccess={handleGoogleSuccess}
-                    onError={handleGoogleError}
-                    theme="outline"
-                    size="large"
-                    shape="rectangular"
-                    text="signup_with"
-                    width="100%"
-                    logo_alignment="left"
-                  />
+                  <div className="w-full bg-white border-2 border-purple-200 rounded-2xl p-1 hover:border-purple-400 transition-colors duration-300">
+                    <GoogleLogin
+                      onSuccess={handleGoogleSuccess}
+                      onError={handleGoogleError}
+                      theme="outline"
+                      size="large"
+                      shape="rectangular"
+                      text="signup_with"
+                      width="100%"
+                      logo_alignment="left"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-4 text-center text-sm text-gray-600">
-                Already have an account?{" "}
+              <div className="mt-8 text-center text-sm">
+                <span className="text-purple-600 font-medium">Already have an account? </span>
                 <Link
                   href="/login"
-                  className="font-medium text-blue-600 hover:text-blue-500"
+                  className="font-bold text-purple-700 hover:text-purple-900 transition-colors duration-300 underline decoration-purple-300 hover:decoration-purple-500 underline-offset-2"
                 >
                   Sign in
                 </Link>
