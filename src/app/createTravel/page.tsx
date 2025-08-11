@@ -22,6 +22,7 @@ export default function TripPlannerPage() {
 
   const activityOptions = [
     'Hiking & Trekking',
+    'Paragliding',
     'Museum Visits',
     'Beach Activities',
     'Local Food Tours',
@@ -124,7 +125,14 @@ const handleActivityToggle = (activity: string): void => {
                     id="startDate"
                     type="date"
                     value={formData.startDate}
-                    onChange={(e) => handleInputChange('startDate', e.target.value)}
+                    min={new Date().toISOString().split("T")[0]} // Prevent past dates
+                    onChange={(e) => {
+                      handleInputChange('startDate', e.target.value);
+                      // If endDate is before new startDate, reset endDate
+                      if (formData.endDate && e.target.value > formData.endDate) {
+                        setFormData(prev => ({ ...prev, endDate: "" }));
+                      }
+                    }}
                     className="w-full pl-10 pr-3 py-2 text-black bg-slate-50/50 border border-slate-200 rounded-md focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 focus:outline-none transition-colors"
                   />
                 </div>
@@ -140,6 +148,8 @@ const handleActivityToggle = (activity: string): void => {
                     id="endDate"
                     type="date"
                     value={formData.endDate}
+                    min={formData.startDate || new Date().toISOString().split("T")[0]} // End date can't be before start date
+                    disabled={!formData.startDate} // Disable until start date is picked
                     onChange={(e) => handleInputChange('endDate', e.target.value)}
                     className="w-full pl-10 pr-3 py-2 text-black bg-slate-50/50 border border-slate-200 rounded-md focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 focus:outline-none transition-colors"
                   />
