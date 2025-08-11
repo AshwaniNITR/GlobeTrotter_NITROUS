@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { v2 as cloudinary } from 'cloudinary';
+import { v2 as cloudinary, UploadApiResponse } from 'cloudinary'; // ✅ Added UploadApiResponse type
 import bcrypt from 'bcryptjs';
-import User from '../../../../models/userModel';
+import User, { IUser } from '../../../../models/userModel'; // ✅ Assuming IUser interface is exported
 import connectMongo from '../../../../dbConnect/dbConnect';
 import { OAuth2Client } from 'google-auth-library';
 import { generateTokens } from '../../../../helpers/getToken';
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
           const arrayBuffer = await profileImage.arrayBuffer();
           const buffer = Buffer.from(arrayBuffer);
 
-          const result = await new Promise((resolve, reject) => {
+          const result: UploadApiResponse = await new Promise((resolve, reject) => { // ✅ Typed
             cloudinary.uploader.upload_stream(
               {
                 folder: 'profile-pictures',
@@ -61,13 +61,13 @@ export async function POST(request: Request) {
               },
               (error, result) => {
                 if (error) reject(error);
-                else resolve(result);
+                else resolve(result as UploadApiResponse);
               }
             ).end(buffer);
           });
 
-          profilePictureUrl = (result as any).secure_url;
-        } catch (uploadError) {
+          profilePictureUrl = result.secure_url;
+        } catch (uploadError: unknown) { // ✅ Unknown instead of any
           console.error('Image upload error:', uploadError);
         }
       }
@@ -105,7 +105,7 @@ export async function POST(request: Request) {
       });
 
       const savedUser = await newUser.save();
-      const { password, ...userResponse } = savedUser.toObject();
+      const { password: _pw, ...userResponse } = savedUser.toObject(); // ✅ Renamed unused var
 
       return NextResponse.json({ success: true, user: userResponse });
 
@@ -173,7 +173,7 @@ export async function POST(request: Request) {
           const arrayBuffer = await profileImage.arrayBuffer();
           const buffer = Buffer.from(arrayBuffer);
 
-          const result = await new Promise((resolve, reject) => {
+          const result: UploadApiResponse = await new Promise((resolve, reject) => { // ✅ Typed
             cloudinary.uploader.upload_stream(
               {
                 folder: 'profile-pictures',
@@ -185,13 +185,13 @@ export async function POST(request: Request) {
               },
               (error, result) => {
                 if (error) reject(error);
-                else resolve(result);
+                else resolve(result as UploadApiResponse);
               }
             ).end(buffer);
           });
 
-          profilePictureUrl = (result as any).secure_url;
-        } catch (uploadError) {
+          profilePictureUrl = result.secure_url;
+        } catch (uploadError: unknown) { // ✅ unknown instead of any
           console.error('Image upload error:', uploadError);
           return NextResponse.json(
             { error: 'Failed to upload image. Please try again.' },
@@ -214,7 +214,6 @@ export async function POST(request: Request) {
         authProvider: 'email',
         profilePicture: profilePictureUrl
       });
-      
 
       const savedUser = await newUser.save();
       const tokenPayload = {
@@ -235,34 +234,47 @@ export async function POST(request: Request) {
         emailType: "VERIFY",
         userId: savedUser._id.toString(),
       });
-      const { password: _, ...userResponse } = savedUser.toObject();
-       // Set access token in cookies (HTTP-only)
-    const headers = new Headers();
-    headers.append(
-  'Set-Cookie',
-  serialize('accessToken', accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 60 * 30,
-    path: '/'
-  })
-);
 
+      const { password: _pw2, ...userResponse } = savedUser.toObject(); // ✅ renamed unused var
+
+      // Set access token in cookies (HTTP-only)
+      const headers = new Headers();
+      headers.append(
+        'Set-Cookie',
+        serialize('accessToken', accessToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          maxAge: 60 * 30,
+          path: '/'
+        })
+      );
 
       return NextResponse.json({ success: true, user: userResponse });
     }
-  } catch (error: any) {
+  } catch (error: unknown) { // ✅ unknown instead of any
     console.error('Signup error:', error);
 
-    if (error.code === 11000) {
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      (error as { code?: number }).code === 11000
+    ) {
       return NextResponse.json(
         { error: 'Email or username already exists' },
         { status: 409 }
       );
     }
 
-    if (error.name === 'ValidationError') {
-      const validationErrors = Object.values(error.errors).map((err: any) => err.message);
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'name' in error &&
+      (error as { name?: string }).name === 'ValidationError'
+    ) {
+      const validationErrors = Object.values(
+        (error as unknown as { errors: Record<string, { message: string }> }).errors
+      ).map((err) => err.message);
       return NextResponse.json(
         { error: validationErrors.join(', ') },
         { status: 400 }
@@ -270,7 +282,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { error: error.message || 'An error occurred during signup' },
+      { error: error instanceof Error ? error.message : 'An error occurred during signup' },
       { status: 500 }
     );
   }

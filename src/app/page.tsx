@@ -93,7 +93,7 @@ export default function LoginPage() {
         throw new Error(data.error || 'Google login failed');
       }
 
-      router.push('/dashboard');
+      router.push('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Google login failed');
     } finally {
@@ -207,7 +207,7 @@ export default function LoginPage() {
           </div>
 
           <div className="mt-4 text-center text-sm text-blue-200">
-            Don't have an account?{' '}
+            Dont have an account?{' '}
             <Link href="/signup" className="font-medium text-blue-400 hover:text-blue-300">
               Sign up
             </Link>

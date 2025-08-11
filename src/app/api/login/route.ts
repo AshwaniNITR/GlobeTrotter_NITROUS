@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import bcryptjs from 'bcryptjs';
 import User from '../../../../models/userModel';
 import connectMongo from '../../../../dbConnect/dbConnect';

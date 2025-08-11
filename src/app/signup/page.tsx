@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+import type { CredentialResponse } from "@react-oauth/google";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -162,12 +163,12 @@ export default function SignupPage() {
       }
 
       const data = await response.json();
-      console.log('Registration successful:', data);
+      console.log('Registration successful, Check your mail:', data);
       
       setSuccess(true);
-      
-      // Redirect to login after 2 seconds
-      setTimeout(() => router.push("/login"), 2000);
+
+      // Redirect to home after 2 seconds
+      setTimeout(() => router.push("/"), 2000);
       
     } catch (err) {
       console.error('Registration error:', err);
@@ -177,13 +178,17 @@ export default function SignupPage() {
     }
   };
 
-  const handleGoogleSuccess = async (credentialResponse: any) => {
+  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
     try {
       setLoading(true);
       setError("");
 
       const formPayload = new FormData();
-      formPayload.append('googleToken', credentialResponse.credential);
+      if (credentialResponse.credential) {
+        formPayload.append('googleToken', credentialResponse.credential);
+      } else {
+        throw new Error("Google credential is missing. Please try again.");
+      }
       
       if (profileImage) {
         formPayload.append('profileImage', profileImage, profileImage.name);
