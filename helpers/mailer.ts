@@ -31,7 +31,7 @@ export const sendEmail = async ({ email, emailType, userId }: EmailOptions) => {
     // Email content
     let subject = '';
     let html = '';
-    const baseUrl = 'https://kreator-kit.vercel.app';
+    const baseUrl = 'http://localhost:3000';
 
     if (emailType === 'VERIFY') {
       subject = 'Verify Your Email Address';
