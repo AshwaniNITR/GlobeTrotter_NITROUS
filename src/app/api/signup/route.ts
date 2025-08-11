@@ -274,16 +274,15 @@ export async function POST(request: Request) {
       // );
 
       const response = NextResponse.json({ success: true, user: userResponse });
+response.cookies.set('accessToken', accessToken, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax', // less restrictive for cross-origin requests
+  path: '/',
+  domain: '.globe-trotter-nitrous.vercel.app', // note the dot for subdomain coverage
+  maxAge: 7 * 24 * 60 * 60, // in seconds
+});
 
-      response.cookies.set("accessToken", accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60, // 7 days
-        path: "/",
-        domain:
-          process.env.NODE_ENV === "production" ? ".vercel.app" : undefined,
-      });
 
       return response;
     }
