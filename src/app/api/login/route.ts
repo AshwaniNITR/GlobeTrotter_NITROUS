@@ -91,14 +91,15 @@ export async function POST(request: Request) {
         }
       });
 
-     response.cookies.set('accessToken', accessToken, {
+response.cookies.set('accessToken', accessToken, {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict',
-  maxAge: 7 * 24 * 60 * 60, // seconds, not ms
+  sameSite: 'lax', // less restrictive for cross-origin requests
   path: '/',
-  domain: process.env.NODE_ENV === 'production' ? '.vercel.app' : undefined
+  domain: '.globe-trotter-nitrous.vercel.app', // note the dot for subdomain coverage
+  maxAge: 7 * 24 * 60 * 60, // in seconds
 });
+
 
 
       return response;
@@ -197,13 +198,15 @@ export async function POST(request: Request) {
       //   sameSite: 'strict',
       //   maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
       // });
-      response.cookies.set('accessToken', accessToken, {
+response.cookies.set('accessToken', accessToken, {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict',
-  maxAge: 7 * 24 * 60 * 60, // seconds
-  path: '/', // important so all routes can access it
+  sameSite: 'lax', // less restrictive for cross-origin requests
+  path: '/',
+  domain: '.globe-trotter-nitrous.vercel.app', // note the dot for subdomain coverage
+  maxAge: 7 * 24 * 60 * 60, // in seconds
 });
+
 
 
       return response;

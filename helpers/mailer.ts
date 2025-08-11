@@ -31,7 +31,7 @@ export const sendEmail = async ({ email, emailType, userId }: EmailOptions) => {
     // Email content
     let subject = '';
     let html = '';
-    const baseUrl = 'http://localhost:3000';
+    const baseUrl = 'https://globe-trotter-nitrous.vercel.app/';
 
     if (emailType === 'VERIFY') {
       subject = 'Verify Your Email Address';
