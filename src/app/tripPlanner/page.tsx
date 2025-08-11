@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { MapPin, Calendar, DollarSign, Plus, Clock, ArrowLeft, Save, Edit3, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 type SelectedPlace = {
   name: string;
@@ -35,6 +36,7 @@ export default function TripDetailsPage() {
   const [totalDays, setTotalDays] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
+  const router = useRouter();
 
   useEffect(() => {
     const loadTripData = async () => {
@@ -450,10 +452,13 @@ export default function TripDetailsPage() {
               <>
                 <Save className="w-5 h-5" />
                 Save Trip Plan
+                
               </>
             )}
+           
           </button>
         </div>
+        <span onClick={() => router.push('/dashboard')} className='text-blue-400 hover:underline cursor-pointer'> Go to Dashboard</span>
       </div>
     </div>
   );

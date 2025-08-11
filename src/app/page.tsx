@@ -57,6 +57,7 @@ export default function LoginPage() {
       }
 
       router.push('/dashboard');
+      localStorage.setItem('userEmail', formData.email);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
