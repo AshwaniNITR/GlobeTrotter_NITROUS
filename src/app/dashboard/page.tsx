@@ -3,6 +3,8 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { FiSearch, FiPlus, FiInstagram, FiTwitter, FiLinkedin, FiGithub } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
+import { routeModule } from 'next/dist/build/templates/app-page';
+import { useRouter } from 'next/navigation';
 
 const ExoticCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -33,8 +35,9 @@ const ExoticCarousel = () => {
     }, 5000);
     return () => clearInterval(timer);
   }, []);
-
+  // const router = useRouter(); // Remove this line from ExoticCarousel
   return (
+    
     <div className="relative h-80 rounded-3xl overflow-hidden mb-12">
       <AnimatePresence mode="wait">
         <motion.div
@@ -117,6 +120,7 @@ export default function DashboardPage() {
 const [profilePicture, setProfilePicture] = useState('');
 const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 const [error, setError] = useState<string | null>(null);
+const router = useRouter();
 
 useEffect(() => {
   async function fetchUserProfile() {
@@ -206,6 +210,7 @@ useEffect(() => {
             transition={{ delay: 0.5 }}
           >
             <motion.div 
+             onClick={() => router.push('/userProfile')}
               className="w-16 h-16 rounded-full overflow-hidden border-2 border-gradient-to-r from-pink-500 to-purple-500 shadow-2xl"
               whileHover={{ scale: 1.1, rotate: 5 }}
             >
@@ -411,6 +416,7 @@ useEffect(() => {
 
         {/* Floating Action Button */}
         <motion.button 
+          onClick={() => router.push('/createTravel')}
           className="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-full flex items-center justify-center shadow-2xl z-50"
           whileHover={{ 
             scale: 1.1, 
