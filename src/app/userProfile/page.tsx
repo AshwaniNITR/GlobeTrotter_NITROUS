@@ -218,6 +218,9 @@ export default function UserProfilePage() {
               <button onClick={() => router.push('/communitySection')} className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
          Community Page
         </button>
+        <button onClick={() => router.push('/cardHistory')} className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+         Travel History
+        </button>
             </div>
           </div>
         </div>
