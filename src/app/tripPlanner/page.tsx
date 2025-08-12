@@ -249,12 +249,12 @@ export default function TripDetailsPage() {
             <h1 className="text-2xl font-bold">GlobalTrotter</h1>
           </div>
           <div className="flex items-center gap-4 text-sm text-gray-400">
-            <span className="flex items-center gap-1">
+            <span className="text-green-500 flex items-center gap-1">
               <Calendar className="w-4 h-4" />
               {totalDays} days total
             </span>
-            <span className="flex items-center gap-1">
-              <DollarSign className="w-4 h-4" />
+            <span className="text-green-500 flex items-center gap-1">
+    
               ${getTotalBudget()} USD
             </span>
           </div>

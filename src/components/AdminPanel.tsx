@@ -18,6 +18,8 @@ import {
   Scatter,
 } from 'recharts';
 import { Calendar, DollarSign, MapPin, TrendingUp, Users, Clock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+
 
 interface Trip {
   _id: string;
@@ -73,6 +75,7 @@ interface AdminPanelProps {
 }
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ initialData = [] }) => {
+  const router = useRouter();
   const [travelData, setTravelData] = useState<Trip[]>(Array.isArray(initialData) ? initialData : []);
   const [isLoading, setIsLoading] = useState(!initialData.length);
   const [selectedTab, setSelectedTab] = useState<string>('overview');
@@ -114,7 +117,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialData = [] }) => {
       avgDays: 0,
       uniqueDestinations: 0,
     };
-
+    
     const totalTrips = travelData.length;
     const totalBudget = travelData.reduce((sum, trip) => sum + (trip.totalBudget || 0), 0);
     const totalDays = travelData.reduce((sum, trip) => sum + (trip.totalDays || 0), 0);
@@ -251,6 +254,7 @@ const NoDataMessage = () => (
 
   if (isLoading) return <LoadingMessage />;
   if (error) return <ErrorMessage message={error} />;
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-800 to-purple-700 p-4 md:p-8">
@@ -600,6 +604,9 @@ const NoDataMessage = () => (
             )}
           </>
         )}
+        <button onClick={() => router.push('/dashboard')} className="m-4 px-4 py-2 flex items-center bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white/90 transition-all duration-300 hover:shadow-lg">
+          Go To Dashboard
+        </button>
       </div>
     </div>
   );

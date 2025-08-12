@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { FiSearch, FiPlus, FiInstagram, FiTwitter, FiLinkedin, FiGithub, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import TripCard from '../../components/TripCard'; // Import the TripCard component
+import TripCard from '../../components/TripCard';
 
 interface Trip {
   _id: string;
@@ -21,15 +21,12 @@ interface Trip {
   }[];
 }
 
+interface RecommendedTrip extends Trip {
+  isRecommended?: boolean;
+}
+
 const ExoticCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [recommendedLocations, setRecommendedLocations] = useState([
-    'Bali, Indonesia',
-    'Santorini, Greece',
-    'Kyoto, Japan',
-    'Machu Picchu, Peru',
-    'Grand Canyon, USA'
-  ]);
   const slides = [
     {
       title: "Mystical Japan",
@@ -83,42 +80,37 @@ const ExoticCarousel = () => {
             </motion.div>
           </div>
           
-          {/* Floating particles */}
-          {(() => {
-            const particles = Array.from({ length: 20 }, () => ({
-              left: Math.random() * 100,
-              top: Math.random() * 100,
-              x1: Math.random() * 100,
-              x2: Math.random() * 100,
-              y1: Math.random() * 100,
-              y2: Math.random() * 100,
-              duration: 3 + Math.random() * 2,
-            }));
-            return particles.map((particle, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-2 h-2 bg-white/30 rounded-full"
-                animate={{
-                  x: [particle.x1, particle.x2],
-                  y: [particle.y1, particle.y2],
-                  opacity: [0.3, 0.8, 0.3]
-                }}
-                transition={{
-                  duration: particle.duration,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                style={{
-                  left: `${particle.left}%`,
-                  top: `${particle.top}%`
-                }}
-              />
-            ));
-          })()}
+          {Array.from({ length: 20 }, () => ({
+            left: Math.random() * 100,
+            top: Math.random() * 100,
+            x1: Math.random() * 100,
+            x2: Math.random() * 100,
+            y1: Math.random() * 100,
+            y2: Math.random() * 100,
+            duration: 3 + Math.random() * 2,
+          })).map((particle, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-2 h-2 bg-white/30 rounded-full"
+              animate={{
+                x: [particle.x1, particle.x2],
+                y: [particle.y1, particle.y2],
+                opacity: [0.3, 0.8, 0.3]
+              }}
+              transition={{
+                duration: particle.duration,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              style={{
+                left: `${particle.left}%`,
+                top: `${particle.top}%`
+              }}
+            />
+          ))}
         </motion.div>
       </AnimatePresence>
       
-      {/* Carousel indicators */}
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3">
         {slides.map((_, index) => (
           <motion.button
@@ -136,11 +128,7 @@ const ExoticCarousel = () => {
   );
 };
 
-// Recommended Locations Carousel Component
-interface RecommendedLocationsCarouselProps {
-  trips: Trip[];
-}
-const RecommendedLocationsCarousel = ({ trips }: RecommendedLocationsCarouselProps) => {
+const RecommendedLocationsCarousel = ({ trips }: { trips: Trip[] }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const recommendedLocations = [
     'Bali, Indonesia',
@@ -153,43 +141,29 @@ const RecommendedLocationsCarousel = ({ trips }: RecommendedLocationsCarouselPro
     'New York, USA'
   ];
 
-  // Auto-advance carousel
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % Math.max(recommendedLocations.length - 2, 1));
+      setCurrentIndex((prev) => (prev + 1) % recommendedLocations.length);
     }, 4000);
     return () => clearInterval(timer);
   }, [recommendedLocations.length]);
 
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % Math.max(recommendedLocations.length - 2, 1));
+    setCurrentIndex((prev) => (prev + 1) % recommendedLocations.length);
   };
 
   const prevSlide = () => {
     setCurrentIndex((prev) => 
-      prev === 0 ? Math.max(recommendedLocations.length - 3, 0) : prev - 1
+      prev === 0 ? recommendedLocations.length - 1 : prev - 1
     );
   };
 
-  // Create mock trip data for recommended locations that don't exist in trips
-  interface TripSection {
-    name: string;
-    budget: number;
-    daysToStay: number;
-    dateRange: string;
-  }
+  const getLocationData = (location: string): RecommendedTrip => {
+    const existingTrip = trips.find((trip) => trip.destination === location);
+    if (existingTrip) return { ...existingTrip, isRecommended: true };
 
-  interface RecommendedTrip extends Trip {
-    isRecommended: boolean;
-  }
-
-  const getLocationData = (location: string): Trip | RecommendedTrip => {
-    const existingTrip = trips.find((trip: Trip) => trip.destination === location);
-    if (existingTrip) return existingTrip;
-
-    // Create mock data for recommended locations
-    const mockBudgets: number[] = [1500, 2000, 2500, 3000, 3500, 4000];
-    const mockDays: number[] = [5, 7, 10, 14];
+    const mockBudgets = [1500, 2000, 2500, 3000, 3500, 4000];
+    const mockDays = [5, 7, 10, 14];
 
     return {
       _id: `mock-${location}`,
@@ -209,8 +183,6 @@ const RecommendedLocationsCarousel = ({ trips }: RecommendedLocationsCarouselPro
       isRecommended: true
     };
   };
-
-  const visibleLocations = recommendedLocations.slice(currentIndex, currentIndex + 3);
 
   return (
     <motion.div 
@@ -236,7 +208,6 @@ const RecommendedLocationsCarousel = ({ trips }: RecommendedLocationsCarouselPro
           Top Recommended Locations
         </h4>
         
-        {/* Navigation Controls */}
         <div className="flex space-x-2">
           <motion.button
             onClick={prevSlide}
@@ -257,30 +228,29 @@ const RecommendedLocationsCarousel = ({ trips }: RecommendedLocationsCarouselPro
         </div>
       </div>
 
-      {/* Carousel Container */}
       <div className="relative overflow-hidden">
         <motion.div 
           className="flex gap-6"
-          animate={{ x: currentIndex * -33.333 + '%' }}
-          transition={{ 
-            type: "spring",
-            stiffness: 300,
-            damping: 30
+          animate={{ 
+            x: `-${currentIndex * (100 / recommendedLocations.length)}%`,
+            transition: { 
+              type: "spring",
+              stiffness: 300,
+              damping: 30
+            }
           }}
-          style={{ width: `${(recommendedLocations.length / 3) * 100}%` }}
         >
           {recommendedLocations.map((location, index) => {
             const locationData = getLocationData(location);
             return (
               <motion.div
                 key={location}
-                className="flex-shrink-0"
-                style={{ width: `${100 / recommendedLocations.length}%` }}
+                className="flex-shrink-0 w-1/3"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ 
                   opacity: 1, 
                   y: 0,
-                  scale: Math.abs(index - currentIndex - 1) < 1.5 ? 1 : 0.9
+                  scale: Math.abs(index - currentIndex) <= 1 ? 1 : 0.9
                 }}
                 transition={{ 
                   delay: index * 0.1,
@@ -292,7 +262,6 @@ const RecommendedLocationsCarousel = ({ trips }: RecommendedLocationsCarouselPro
                 }}
               >
                 <div className="relative bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 overflow-hidden shadow-2xl">
-                  {/* Recommended Badge */}
                   <motion.div 
                     className="absolute top-4 right-4 z-20"
                     initial={{ scale: 0 }}
@@ -304,7 +273,6 @@ const RecommendedLocationsCarousel = ({ trips }: RecommendedLocationsCarouselPro
                     </div>
                   </motion.div>
 
-                  {/* Location Image/Gradient */}
                   <div className="relative h-48 bg-gradient-to-br from-purple-400 via-pink-500 to-orange-400">
                     <div className="absolute inset-0 bg-black/20" />
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -318,7 +286,6 @@ const RecommendedLocationsCarousel = ({ trips }: RecommendedLocationsCarouselPro
                       </motion.h3>
                     </div>
                     
-                    {/* Floating elements */}
                     <motion.div
                       className="absolute top-6 left-6 w-4 h-4 bg-white/40 rounded-full"
                       animate={{
@@ -345,7 +312,6 @@ const RecommendedLocationsCarousel = ({ trips }: RecommendedLocationsCarouselPro
                     />
                   </div>
 
-                  {/* Content */}
                   <div className="p-6">
                     <div className="flex justify-between items-center mb-4">
                       <span className="text-sm text-green-400 font-semibold">
@@ -378,6 +344,8 @@ const RecommendedLocationsCarousel = ({ trips }: RecommendedLocationsCarouselPro
           })}
         </motion.div>
       </div>
+      {/* Carousel Container */}
+      
 
       {/* Carousel Indicators */}
       <div className="flex justify-center mt-6 space-x-2">
@@ -505,6 +473,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white relative overflow-hidden">
       {/* Animated background elements */}
+      
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <motion.div
           className="absolute w-96 h-96 bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-full blur-3xl"
@@ -580,7 +549,7 @@ export default function DashboardPage() {
           </motion.div>
         </div>
       </motion.header>
-
+      
       <main className="container mx-auto px-6 py-8 relative z-10">
         {/* Exotic Carousel */}
         <motion.div

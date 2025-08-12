@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { MapPin, Calendar, Compass, Star, Plane, ChevronDown, Check, Activity, DollarSign, Map, Loader, X, Plus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function TripPlannerPage() {
   type FormData = {
@@ -36,6 +37,7 @@ export default function TripPlannerPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [numberOfDays, setNumberOfDays] = useState<number>(0);
+  const router=useRouter();
 
   const activityOptions = [
     'Hiking & Trekking',
@@ -286,8 +288,8 @@ export default function TripPlannerPage() {
       // window.location.href = '/trip-details'; // or use your router
       // For Next.js: router.push('/trip-details');
       // For React Router: navigate('/trip-details');
-      
-      alert(`Trip plan created successfully!\n\nDestination: ${formData.place}\nDuration: ${numberOfDays} days\nPlaces: ${selectedPlaces.length}\nTotal Budget: ${totalBudget} USD\n\nIn your actual app, you would be redirected to the trip details page now.`);
+      // For demo purposes, just alerting the trip creation
+      router.push('/tripPlanner')
     } catch (err) {
       console.error('Error creating trip:', err);
       setError('Failed to create trip. Please try again.');
@@ -699,7 +701,7 @@ export default function TripPlannerPage() {
                           Discover Amazing Places
                         </p>
                         <p className="text-gray-500 text-xs">
-                          Click "Get AI Suggestions" to see recommendations
+                          Click Get AI Suggestions to see recommendations
                         </p>
                       </div>
                     </div>
