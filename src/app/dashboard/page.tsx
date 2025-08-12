@@ -16,6 +16,7 @@ interface Trip {
   sections: {
     name: string;
     budget: number;
+
     daysToStay: number;
     dateRange: string;
   }[];
@@ -133,16 +134,41 @@ const ExoticCarousel = () => {
 
 const RecommendedLocationsCarousel = ({ trips }: { trips: Trip[] }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const recommendedLocations = [
-    'Bali, Indonesia',
-    'Santorini, Greece', 
-    'Kyoto, Japan',
-    'Machu Picchu, Peru',
-    'Grand Canyon, USA',
-    'Paris, France',
-    'Tokyo, Japan',
-    'New York, USA'
-  ];
+ const recommendedLocations = [
+  {
+    name: 'Bali, Indonesia',
+    image: '/bali.jpg'
+  },
+  {
+    name: 'Santorini, Greece',
+    image: '/santorini.jpg'
+  },
+  {
+    name: 'Kyoto, Japan',
+    image: '/kyoto.jpg'
+  },
+  {
+    name: 'Machu Picchu, Peru',
+    image: '/img1.jpg'
+  },
+  {
+    name: 'Grand Canyon, USA',
+    image: '/img1.jpg'
+  },
+  {
+    name: 'Paris, France',
+    image: '/img2.jpg'
+  },
+  {
+    name: 'Tokyo, Japan',
+    image: '/tokyo.jpg'
+  },
+  {
+    name: 'New York, USA',
+    image: '/nyk.jpg'
+  }
+];
+
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -258,105 +284,87 @@ const getLocationData = (location: string): RecommendedTrip => {
           }}
         >
           {recommendedLocations.map((location, index) => {
-            const locationData = getLocationData(location);
-            return (
-              <motion.div
-                key={location}
-                className="flex-shrink-0 w-1/3"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ 
-                  opacity: 1, 
-                  y: 0,
-                  scale: Math.abs(index - currentIndex) <= 1 ? 1 : 0.9
-                }}
-                transition={{ 
-                  delay: index * 0.1,
-                  duration: 0.6
-                }}
-                whileHover={{ 
-                  scale: 1.05,
-                  zIndex: 10
-                }}
-              >
-                <div className="relative bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 overflow-hidden shadow-2xl">
-                  <motion.div 
-                    className="absolute top-4 right-4 z-20"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.5 + index * 0.1, type: "spring" }}
-                  >
-                    <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs font-bold px-3 py-1 rounded-full">
-                      ⭐ RECOMMENDED
-                    </div>
-                  </motion.div>
+  return (
+    <motion.div
+      key={location.name}
+      className="flex-shrink-0 w-1/3"
+      initial={{ opacity: 0, y: 30 }}
+      animate={{
+        opacity: 1,
+        y: 0,
+        scale: Math.abs(index - currentIndex) <= 1 ? 1 : 0.9
+      }}
+      transition={{
+        delay: index * 0.1,
+        duration: 0.6
+      }}
+      whileHover={{
+        scale: 1.05,
+        zIndex: 10
+      }}
+    >
+      <div className="relative bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 overflow-hidden shadow-2xl">
+        {/* Recommended badge */}
+        <motion.div
+          className="absolute top-4 right-4 z-20"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{
+            delay: 0.5 + index * 0.1,
+            type: "spring"
+          }}
+        >
+          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs font-bold px-3 py-1 rounded-full">
+            ⭐ RECOMMENDED
+          </div>
+        </motion.div>
 
-                  <div className="relative h-48 bg-gradient-to-br from-purple-400 via-pink-500 to-orange-400">
-                    <div className="absolute inset-0 bg-black/20" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <motion.h3 
-                        className="text-2xl font-bold text-white text-center px-4"
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 0.3 + index * 0.1 }}
-                      >
-                        {location}
-                      </motion.h3>
-                    </div>
-                    
-                    <motion.div
-                      className="absolute top-6 left-6 w-4 h-4 bg-white/40 rounded-full"
-                      animate={{
-                        y: [0, -10, 0],
-                        opacity: [0.4, 0.8, 0.4]
-                      }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        delay: index * 0.5
-                      }}
-                    />
-                    <motion.div
-                      className="absolute bottom-8 right-8 w-3 h-3 bg-yellow-400/60 rounded-full"
-                      animate={{
-                        scale: [1, 1.2, 1],
-                        opacity: [0.6, 1, 0.6]
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        delay: index * 0.3
-                      }}
-                    />
-                  </div>
+        {/* Image */}
+        <div className="relative h-48">
+          <Image
+            src={location.image}
+            alt={location.name}
+            fill
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-black/30" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <motion.h3
+              className="text-2xl font-bold text-white text-center px-4"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{
+                delay: 0.3 + index * 0.1
+              }}
+            >
+              {location.name}
+            </motion.h3>
+          </div>
+        </div>
 
-                  <div className="p-6">
-                    <div className="flex justify-between items-center mb-4">
-                     
-                      <span className="text-sm text-yellow-400 font-semibold">
-                        ${locationData.totalBudget}
-                      </span>
-                    </div>
-                    
-                    <p className="text-white/80 text-sm mb-4">
-                      Experience the magic of {location.split(',')[0]} with our curated travel experiences.
-                    </p>
+        {/* Description + Button */}
+        <div className="p-6">
+          <p className="text-white/80 text-sm mb-4">
+            Experience the magic of {location.name.split(',')[0]} with our curated travel experiences.
+          </p>
 
-                    <motion.button 
-                      className="w-full py-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm text-white rounded-2xl border border-white/20 font-medium"
-                      whileHover={{ 
-                        scale: 1.02,
-                        backgroundColor: "rgba(168, 85, 247, 0.3)",
-                        boxShadow: "0 10px 25px rgba(168, 85, 247, 0.3)"
-                      }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      Explore Destination
-                    </motion.button>
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
+          <motion.button
+            className="w-full py-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm text-white rounded-2xl border border-white/20 font-medium"
+            whileHover={{
+              scale: 1.02,
+              backgroundColor: "rgba(168, 85, 247, 0.3)",
+              boxShadow: "0 10px 25px rgba(168, 85, 247, 0.3)"
+            }}
+            whileTap={{ scale: 0.98 }}
+          >
+            Explore Destination
+          </motion.button>
+        </div>
+      </div>
+    </motion.div>
+  );
+})}
+
         </motion.div>
       </div>
       {/* Carousel Container */}
@@ -525,7 +533,7 @@ export default function DashboardPage() {
             whileHover={{ scale: 1.05 }}
           >
             <motion.div 
-              className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-2xl"
+              className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-400 rounded-2xl flex items-center justify-center shadow-2xl"
               whileHover={{ rotate: 360 }}
               transition={{ duration: 0.6 }}
             >
