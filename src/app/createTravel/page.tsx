@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { MapPin, Calendar, Compass, Star, Plane, ChevronDown, Check, Activity, DollarSign, Map, Loader } from 'lucide-react';
 
 export default function TripPlannerPage() {
@@ -18,6 +19,11 @@ export default function TripPlannerPage() {
     image_url: string;
   };
 
+  type SelectedPlace = {
+    name: string;
+    budget: number;
+  };
+
   const [formData, setFormData] = useState<FormData>({
     startDate: '',
     place: '',
@@ -27,8 +33,10 @@ export default function TripPlannerPage() {
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [suggestedPlaces, setSuggestedPlaces] = useState<PlaceData[]>([]);
+  const [selectedPlaces, setSelectedPlaces] = useState<SelectedPlace[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
+  const [numberOfDays, setNumberOfDays] = useState<number>(0);
 
   const activityOptions = [
     'Hiking & Trekking',
@@ -61,6 +69,32 @@ export default function TripPlannerPage() {
       ...prev,
       [field]: value
     }));
+
+    // Store dates in localStorage and calculate days
+    if (field === 'startDate' || field === 'endDate') {
+      const updatedData = { ...formData, [field]: value };
+      
+      // Store dates in localStorage (in actual app, uncomment these lines)
+      localStorage.setItem('tripStartDate', updatedData.startDate);
+      localStorage.setItem('tripEndDate', updatedData.endDate);
+      
+      // Calculate number of days
+      if (updatedData.startDate && updatedData.endDate) {
+        const startDate = new Date(updatedData.startDate);
+        const endDate = new Date(updatedData.endDate);
+        const timeDiff = endDate.getTime() - startDate.getTime();
+        const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1; // +1 to include both start and end days
+        
+        if (daysDiff > 0) {
+          setNumberOfDays(daysDiff);
+          // Store number of days in localStorage (in actual app, uncomment this line)
+          localStorage.setItem('tripDays', daysDiff.toString());
+        } else {
+          setNumberOfDays(0);
+          localStorage.setItem('tripDays', '0');
+        }
+      }
+    }
   };
 
   const handleActivityToggle = (activity: string): void => {
@@ -71,6 +105,64 @@ export default function TripPlannerPage() {
         : [...prev.activities, activity]
     }));
   };
+
+  // Handle place selection/deselection
+  const handlePlaceSelection = (place: PlaceData) => {
+    const selectedPlace: SelectedPlace = {
+      name: place.name,
+      budget: place.budget
+    };
+
+    setSelectedPlaces(prev => {
+      const isAlreadySelected = prev.some(p => p.name === place.name);
+      
+      if (isAlreadySelected) {
+        // Remove from selection
+        const updated = prev.filter(p => p.name !== place.name);
+        // In your actual app, replace this with localStorage
+        localStorage.setItem('selectedPlaces', JSON.stringify(updated));
+        return updated;
+      } else {
+        // Add to selection
+        const updated = [...prev, selectedPlace];
+        // In your actual app, replace this with localStorage
+        localStorage.setItem('selectedPlaces', JSON.stringify(updated));
+        return updated;
+      }
+    });
+  };
+
+  // Check if a place is selected
+  const isPlaceSelected = (placeName: string): boolean => {
+    return selectedPlaces.some(p => p.name === placeName);
+  };
+
+  // Calculate total budget
+  const totalBudget = selectedPlaces.reduce((sum, place) => sum + place.budget, 0);
+
+  // Load data from localStorage on component mount (in actual app, uncomment this)
+  useEffect(() => {
+    const savedStartDate = localStorage.getItem('tripStartDate');
+    const savedEndDate = localStorage.getItem('tripEndDate');
+    const savedDays = localStorage.getItem('tripDays');
+    const savedPlaces = localStorage.getItem('selectedPlaces');
+    
+    if (savedStartDate && savedEndDate) {
+      setFormData(prev => ({
+        ...prev,
+        startDate: savedStartDate,
+        endDate: savedEndDate
+      }));
+    }
+    
+    if (savedDays) {
+      setNumberOfDays(parseInt(savedDays));
+    }
+    
+    if (savedPlaces) {
+      setSelectedPlaces(JSON.parse(savedPlaces));
+    }
+  }, []);
 
   const fetchSuggestions = async () => {
     if (!formData.place.trim()) return;
@@ -152,17 +244,58 @@ export default function TripPlannerPage() {
   };
 
   const handleCreateTrip = async () => {
+    // Validate required fields
+    if (!formData.startDate || !formData.endDate || !formData.place) {
+      setError('Please fill in all required fields (Start Date, End Date, and Place)');
+      return;
+    }
+
+    if (selectedPlaces.length === 0) {
+      setError('Please select at least one place to visit');
+      return;
+    }
+
     const tripData = {
       startDate: formData.startDate,
       endDate: formData.endDate,
+      numberOfDays: numberOfDays,
       place: formData.place,
       activities: formData.activities,
-      suggestedPlaces: suggestedPlaces
+      suggestedPlaces: suggestedPlaces,
+      selectedPlaces: selectedPlaces,
+      totalBudget: totalBudget,
+      createdAt: new Date().toISOString()
     };
     
-    console.log('Trip Data:', tripData);
-    // TODO: Send complete trip data to your backend for saving
+    try {
+      // Store all data in localStorage (in actual app, uncomment these lines)
+      localStorage.setItem('completeTripData', JSON.stringify(tripData));
+      localStorage.setItem('tripStartDate', formData.startDate);
+      localStorage.setItem('tripEndDate', formData.endDate);
+      localStorage.setItem('tripPlace', formData.place);
+      localStorage.setItem('tripActivities', JSON.stringify(formData.activities));
+      localStorage.setItem('selectedPlaces', JSON.stringify(selectedPlaces));
+      localStorage.setItem('tripDays', numberOfDays.toString());
+      localStorage.setItem('totalBudget', totalBudget.toString());
+      
+      console.log('Trip Data Stored:', tripData);
+      console.log('Selected Places:', selectedPlaces);
+      console.log('Trip Duration:', numberOfDays, 'days');
+      console.log('Total Budget:', totalBudget, 'USD');
+      
+      // In your actual app, replace this alert with navigation:
+      // window.location.href = '/trip-details'; // or use your router
+      // For Next.js: router.push('/trip-details');
+      // For React Router: navigate('/trip-details');
+      
+      //alert(`Trip plan created successfully!\n\nDestination: ${formData.place}\nDuration: ${numberOfDays} days\nPlaces: ${selectedPlaces.length}\nTotal Budget: ${totalBudget} USD\n\nIn your actual app, you would be redirected to the trip details page now.`);
+      router.push('/tripPlanner')
+    } catch (err) {
+      console.error('Error creating trip:', err);
+      setError('Failed to create trip. Please try again.');
+    }
   };
+  const router=useRouter();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-slate-50 to-purple-100 relative">
@@ -323,6 +456,64 @@ export default function TripPlannerPage() {
               </div>
             </div>
 
+            {/* Trip Duration and Budget Summary */}
+            {(numberOfDays > 0 || selectedPlaces.length > 0) && (
+              <div className="mb-8 p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center gap-2 mb-3">
+                  <Calendar className="w-5 h-5 text-blue-600" />
+                  <h3 className="text-lg font-semibold text-blue-800">Trip Summary</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {numberOfDays > 0 && (
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-blue-600" />
+                      <span className="text-blue-800 font-medium">
+                        Duration: {numberOfDays} {numberOfDays === 1 ? 'day' : 'days'}
+                      </span>
+                    </div>
+                  )}
+                  {selectedPlaces.length > 0 && (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-purple-600" />
+                        <span className="text-purple-800 font-medium">
+                          Places: {selectedPlaces.length} selected
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="w-4 h-4 text-green-600" />
+                        <span className="text-green-800 font-medium">
+                          Budget: ${totalBudget} USD
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Selected Places Details */}
+            {selectedPlaces.length > 0 && (
+              <div className="mb-8 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
+                <div className="flex items-center gap-2 mb-3">
+                  <Check className="w-5 h-5 text-green-600" />
+                  <h3 className="text-lg font-semibold text-green-800">
+                    Selected Places ({selectedPlaces.length})
+                  </h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {selectedPlaces.map((place, index) => (
+                    <span
+                      key={index}
+                      className="inline-block bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full"
+                    >
+                      {place.name} - ${place.budget}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Suggestions Section */}
             <div>
               <div className="flex items-center gap-2 mb-6">
@@ -330,6 +521,11 @@ export default function TripPlannerPage() {
                 <h3 className="text-xl font-semibold text-slate-800">
                   Suggested Places to Visit
                 </h3>
+                {selectedPlaces.length > 0 && (
+                  <span className="text-sm text-slate-600">
+                    (Click to select/deselect)
+                  </span>
+                )}
               </div>
 
               {error && (
@@ -352,62 +548,82 @@ export default function TripPlannerPage() {
                     </div>
                   ))
                 ) : suggestedPlaces.length > 0 ? (
-                  suggestedPlaces.map((place, index) => (
-                    <div 
-                      key={index}
-                      className="bg-white border border-slate-200 rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer group overflow-hidden"
-                    >
-                      <div className="h-32 overflow-hidden">
-                        {place.image_url ? (
-                          <img 
-                            src={place.image_url} 
-                            alt={place.name}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjZjFmNWY5Ii8+CjxwYXRoIGQ9Im0xNSA5LTYgNi02LTYiIHN0cm9rZT0iIzk0YTNiOCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+';
-                            }}
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-slate-100 flex items-center justify-center">
-                            <Map className="w-8 h-8 text-slate-400" />
+                  suggestedPlaces.map((place, index) => {
+                    const isSelected = isPlaceSelected(place.name);
+                    return (
+                      <div 
+                        key={index}
+                        onClick={() => handlePlaceSelection(place)}
+                        className={`bg-white border-2 rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer group overflow-hidden relative ${
+                          isSelected 
+                            ? 'border-green-500 shadow-lg ring-2 ring-green-200' 
+                            : 'border-slate-200 hover:border-purple-300'
+                        }`}
+                      >
+                        {/* Selection indicator */}
+                        {isSelected && (
+                          <div className="absolute top-2 right-2 z-10 bg-green-500 rounded-full p-1">
+                            <Check className="w-4 h-4 text-white" />
                           </div>
                         )}
-                      </div>
-                      
-                      <div className="p-4">
-                        <h4 className="font-semibold text-slate-800 text-sm mb-2 line-clamp-1">
-                          {place.name}
-                        </h4>
-                        
-                        <div className="flex items-center gap-1 mb-3">
-                          
-                          <span className="text-green-600 font-medium text-sm">
-                            ${place.budget} USD
-                          </span>
+
+                        <div className="h-32 overflow-hidden">
+                          {place.image_url ? (
+                            <img 
+                              src={place.image_url} 
+                              alt={place.name}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjZjFmNWY5Ii8+CjxwYXRoIGQ9Im0xNSA5LTYgNi02LTYiIHN0cm9rZT0iIzk0YTNiOCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+';
+                              }}
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-slate-100 flex items-center justify-center">
+                              <Map className="w-8 h-8 text-slate-400" />
+                            </div>
+                          )}
                         </div>
                         
-                        <div className="space-y-2">
-                          <p className="text-xs text-slate-600 font-medium">Activities:</p>
-                          <div className="flex flex-wrap gap-1">
-                            {place.activities.slice(0, 2).map((activity, idx) => (
-                              <span
-                                key={idx}
-                                className="inline-block bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full"
-                              >
-                                {activity}
-                              </span>
-                            ))}
-                            {place.activities.length > 2 && (
-                              <span className="inline-block bg-slate-100 text-slate-600 text-xs px-2 py-1 rounded-full">
-                                +{place.activities.length - 2}
-                              </span>
-                            )}
+                        <div className="p-4">
+                          <h4 className="font-semibold text-slate-800 text-sm mb-2 line-clamp-1">
+                            {place.name}
+                          </h4>
+                          
+                          <div className="flex items-center gap-1 mb-3">
+                            <DollarSign className="w-4 h-4 text-green-600" />
+                            <span className="text-green-600 font-medium text-sm">
+                              ${place.budget} USD
+                            </span>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <p className="text-xs text-slate-600 font-medium">Activities:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {place.activities.slice(0, 2).map((activity, idx) => (
+                                <span
+                                  key={idx}
+                                  className="inline-block bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full"
+                                >
+                                  {activity}
+                                </span>
+                              ))}
+                              {place.activities.length > 2 && (
+                                <span className="inline-block bg-slate-100 text-slate-600 text-xs px-2 py-1 rounded-full">
+                                  +{place.activities.length - 2}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
+
+                        {/* Select indicator overlay */}
+                        <div className={`absolute inset-0 pointer-events-none transition-opacity duration-200 ${
+                          isSelected ? 'opacity-10' : 'opacity-0'
+                        } bg-green-500`} />
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
                   // Empty state
                   Array(6).fill(null).map((_, index) => (

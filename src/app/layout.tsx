@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'GlobalTrotter - Plan Your Perfect Trip',
-  description: 'Create, manage, and share amazing travel itineraries with GlobalTrotter',
+  description: 'Create, manage, and share amazing travel itineraries with GlobalTrotter'
 };
 
 export default function RootLayout({

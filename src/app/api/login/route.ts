@@ -1,13 +1,13 @@
-import { NextResponse } from 'next/server';
-import bcryptjs from 'bcryptjs';
-import User from '../../../../models/userModel';
-import connectMongo from '../../../../dbConnect/dbConnect';
-import { OAuth2Client } from 'google-auth-library';
-import { generateTokens } from '../../../../helpers/getToken';
+import { NextResponse } from "next/server";
+import bcryptjs from "bcryptjs";
+import User from "../../../../models/userModel";
+import connectMongo from "../../../../dbConnect/dbConnect";
+import { OAuth2Client } from "google-auth-library";
+import { generateTokens } from "../../../../helpers/getToken";
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
@@ -21,11 +21,11 @@ export async function POST(request: Request) {
         idToken: googleToken,
         audience: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
       });
-      
+
       const payload = ticket.getPayload();
       if (!payload?.email_verified || !payload.email) {
         return NextResponse.json(
-          { error: 'Google account not verified or email missing' },
+          { error: "Google account not verified or email missing" },
           { status: 401 }
         );
       }
@@ -34,32 +34,30 @@ export async function POST(request: Request) {
 
       // Find existing user by email or Google ID
       const existingUser = await User.findOne({
-        $or: [
-          { email: googleEmail },
-          { googleId: payload.sub }
-        ]
+        $or: [{ email: googleEmail }, { googleId: payload.sub }],
       });
 
       if (!existingUser) {
         return NextResponse.json(
-          { error: 'No account found. Please sign up first.' },
+          { error: "No account found. Please sign up first." },
           { status: 404 }
         );
       }
 
       // Check if user signed up with email but trying to login with Google
-      if (existingUser.authProvider === 'email' && !existingUser.googleId) {
+      if (existingUser.authProvider === "email" && !existingUser.googleId) {
         return NextResponse.json(
-          { 
-            error: 'Account exists with email/password. Please login with your password or link your Google account.',
-            provider: 'email'
+          {
+            error:
+              "Account exists with email/password. Please login with your password or link your Google account.",
+            provider: "email",
           },
           { status: 409 }
         );
       }
 
       // Update Google ID if user exists but doesn't have it stored
-      if (!existingUser.googleId && existingUser.authProvider === 'google') {
+      if (!existingUser.googleId && existingUser.authProvider === "google") {
         existingUser.googleId = payload.sub;
         await existingUser.save();
       }
@@ -68,7 +66,7 @@ export async function POST(request: Request) {
       const tokenPayload = {
         userId: existingUser._id.toString(),
         email: existingUser.email,
-        username: existingUser.username
+        username: existingUser.username,
       };
 
       const { accessToken, refreshToken } = generateTokens(tokenPayload);
@@ -80,59 +78,57 @@ export async function POST(request: Request) {
       // Set access token as httpOnly cookie
       const response = NextResponse.json({
         success: true,
-        message: 'Google login successful',
+        message: "Google login successful",
         accessToken,
         user: {
           id: existingUser._id,
           email: existingUser.email,
           username: existingUser.username,
           isVerified: existingUser.isVerified,
-          profilePicture: existingUser.profilePicture
-        }
+          profilePicture: existingUser.profilePicture,
+        },
       });
 
-response.cookies.set('accessToken', accessToken, {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax', // less restrictive for cross-origin requests
-  path: '/',
-  domain: '.globe-trotter-nitrous.vercel.app', // note the dot for subdomain coverage
-  maxAge: 7 * 24 * 60 * 60, // in seconds
-});
-
-
+      response.cookies.set("accessToken", accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax", // less restrictive for cross-origin requests
+        path: "/",
+        domain: ".globe-trotter-nitrous.vercel.app", // note the dot for subdomain coverage
+        maxAge: 7 * 24 * 60 * 60, // in seconds
+      });
 
       return response;
-
     } else {
       // Regular email/password login flow
       if (!email || !password) {
         return NextResponse.json(
-          { error: 'Email and password are required' },
+          { error: "Email and password are required" },
           { status: 400 }
         );
       }
 
-      
       console.log(`Email: ${email}, Password: ${password}`);
       const normalizedEmail = email.toLowerCase();
-      const user = await User.findOne({ email: normalizedEmail }).select('+password +refreshToken');
-      console.log(`User found: ${user ? 'Yes' : 'No'}`);
+      const user = await User.findOne({ email: normalizedEmail }).select(
+        "+password +refreshToken"
+      );
+      console.log(`User found: ${user ? "Yes" : "No"}`);
       console.log(user);
 
       if (!user) {
         return NextResponse.json(
-          { error: 'Invalid email or password' },
+          { error: "Invalid email or password" },
           { status: 401 }
         );
       }
 
       // Check if user signed up with Google but trying to login with password
-      if (user.authProvider === 'google' && !user.password) {
+      if (user.authProvider === "google" && !user.password) {
         return NextResponse.json(
-          { 
-            error: 'Account exists with Google. Please login with Google.',
-            provider: 'google'
+          {
+            error: "Account exists with Google. Please login with Google.",
+            provider: "google",
           },
           { status: 409 }
         );
@@ -141,7 +137,7 @@ response.cookies.set('accessToken', accessToken, {
       // Verify password
       if (!user.password) {
         return NextResponse.json(
-          { error: 'Invalid email or password' },
+          { error: "Invalid email or password" },
           { status: 401 }
         );
       }
@@ -149,7 +145,7 @@ response.cookies.set('accessToken', accessToken, {
       const isValidPassword = await bcryptjs.compare(password, user.password);
       if (!isValidPassword) {
         return NextResponse.json(
-          { error: 'Invalid email or password' },
+          { error: "Invalid email or password" },
           { status: 401 }
         );
       }
@@ -157,9 +153,9 @@ response.cookies.set('accessToken', accessToken, {
       // Optional: Check if email is verified
       if (!user.isVerified) {
         return NextResponse.json(
-          { 
-            error: 'Please verify your email before logging in',
-            needsVerification: true
+          {
+            error: "Please verify your email before logging in",
+            needsVerification: true,
           },
           { status: 403 }
         );
@@ -169,7 +165,7 @@ response.cookies.set('accessToken', accessToken, {
       const tokenPayload = {
         userId: user._id.toString(),
         email: user.email,
-        username: user.username
+        username: user.username,
       };
 
       const { accessToken, refreshToken } = generateTokens(tokenPayload);
@@ -181,15 +177,15 @@ response.cookies.set('accessToken', accessToken, {
       // Set refresh token as httpOnly cookie
       const response = NextResponse.json({
         success: true,
-        message: 'Login successful',
+        message: "Login successful",
         accessToken,
         user: {
           id: user._id,
           email: user.email,
           username: user.username,
           isVerified: user.isVerified,
-          profilePicture: user.profilePicture
-        }
+          profilePicture: user.profilePicture,
+        },
       });
 
       // response.cookies.set('accessToken', accessToken, {
@@ -198,25 +194,23 @@ response.cookies.set('accessToken', accessToken, {
       //   sameSite: 'strict',
       //   maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
       // });
-response.cookies.set('accessToken', accessToken, {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax', // less restrictive for cross-origin requests
-  path: '/',
-  domain: '.globe-trotter-nitrous.vercel.app', // note the dot for subdomain coverage
-  maxAge: 7 * 24 * 60 * 60, // in seconds
-});
-
-
-
+      response.cookies.set("accessToken", accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax", // less restrictive for cross-origin requests
+        path: "/",
+        domain: ".globe-trotter-nitrous.vercel.app", // note the dot for subdomain coverage
+        maxAge: 7 * 24 * 60 * 60, // in seconds
+      });
+      
       return response;
     }
   } catch (error: unknown) {
-    console.error('Login Error:', error);
+    console.error("Login Error:", error);
     return NextResponse.json(
-      { 
-        error: 'An error occurred during login',
-        details: error instanceof Error ? error.message : undefined
+      {
+        error: "An error occurred during login",
+        details: error instanceof Error ? error.message : undefined,
       },
       { status: 500 }
     );

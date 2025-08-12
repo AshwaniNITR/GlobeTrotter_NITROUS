@@ -45,7 +45,6 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        // Check if user needs password reset
         if (data.needsPasswordReset) {
           setError(data.error + ' Redirecting to password reset...');
           setTimeout(() => {
@@ -56,7 +55,8 @@ export default function LoginPage() {
         throw new Error(data.error || 'Login failed');
       }
 
-      router.push('/');
+      router.push('/dashboard');
+      localStorage.setItem('userEmail', formData.email);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
@@ -73,7 +73,6 @@ export default function LoginPage() {
         throw new Error('No credential received from Google');
       }
 
-      // Optional: Decode the token to show user info
       const decoded = jwtDecode<GoogleJwtPayload>(credentialResponse.credential);
       console.log('Google user:', decoded);
 
@@ -93,7 +92,7 @@ export default function LoginPage() {
         throw new Error(data.error || 'Google login failed');
       }
 
-      router.push('/');
+      router.push('/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Google login failed');
     } finally {
@@ -106,23 +105,24 @@ export default function LoginPage() {
   };
 
   return (
-    <GoogleOAuthProvider
-      clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}
-    >
-      <div className="min-h-screen bg-gradient-to-b from-blue-900 to-blue-950 flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-blue-800/30 p-8 rounded-lg shadow-lg border border-blue-700/50 backdrop-blur-sm">
-          <h1 className="text-2xl font-bold text-center text-white mb-6">Sign In</h1>
+    <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
+      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-violet-900 flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-white/5 backdrop-blur-lg p-8 rounded-2xl shadow-xl border border-white/10">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-amber-300 mb-2">Welcome Back</h1>
+            <p className="text-white/80">Sign in to your account</p>
+          </div>
           
           {error && (
-            <div className="mb-4 p-3 bg-red-500/20 text-red-200 rounded-md text-sm">
-              {error}
+            <div className="mb-6 p-3 bg-red-400/20 text-red-100 rounded-lg border border-red-400/30">
+              <p className="text-center">{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-blue-100 mb-1">
-                Email
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-1">
+              <label htmlFor="email" className="block text-sm font-medium text-amber-100">
+                Email Address
               </label>
               <input
                 type="email"
@@ -131,13 +131,13 @@ export default function LoginPage() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 bg-blue-900/50 text-white border border-blue-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-blue-300"
-                placeholder="Enter your email"
+                className="w-full px-4 py-3 bg-white/5 text-amber-50 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400 placeholder-white/30"
+                placeholder="you@example.com"
               />
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-blue-100 mb-1">
+            <div className="space-y-1">
+              <label htmlFor="password" className="block text-sm font-medium text-amber-100">
                 Password
               </label>
               <input
@@ -147,8 +147,8 @@ export default function LoginPage() {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 bg-blue-900/50 text-black border border-blue-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-blue-300"
-                placeholder="Enter your password"
+                className="w-full px-4 py-3 bg-white/5 text-amber-50 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400 placeholder-white/30"
+                placeholder="••••••••"
               />
             </div>
 
@@ -158,14 +158,14 @@ export default function LoginPage() {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-blue-400 rounded"
+                  className="h-4 w-4 text-amber-400 focus:ring-amber-400 border-white/30 rounded"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-blue-200">
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-amber-100">
                   Remember me
                 </label>
               </div>
 
-              <Link href="/forgot-password" className="text-sm text-blue-400 hover:text-blue-300">
+              <Link href="/forgot-password" className="text-sm text-amber-300 hover:text-amber-200 underline">
                 Forgot password?
               </Link>
             </div>
@@ -173,21 +173,31 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
-                loading ? 'opacity-70 cursor-not-allowed' : ''
+              className={`w-full py-3 px-4 rounded-lg text-sm font-medium text-purple-900 bg-amber-400 hover:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 transition-all ${
+                loading ? 'opacity-80 cursor-not-allowed' : 'hover:shadow-lg hover:shadow-amber-400/20'
               }`}
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? (
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-purple-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Signing in...
+                </span>
+              ) : (
+                'Sign In'
+              )}
             </button>
           </form>
 
-          <div className="mt-6">
+          <div className="mt-8">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-              
+                <div className="w-full border-t border-white/20"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-transparent text-blue-200">
+                <span className="px-2 bg-transparent text-white/60">
                   Or continue with
                 </span>
               </div>
@@ -197,7 +207,7 @@ export default function LoginPage() {
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={handleGoogleError}
-                theme="filled_blue"
+                theme="filled_black"
                 size="large"
                 shape="rectangular"
                 text="signin_with"
@@ -206,9 +216,9 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="mt-4 text-center text-sm text-blue-200">
+          <div className="mt-8 text-center text-sm text-white/70">
             Dont have an account?{' '}
-            <Link href="/signup" className="font-medium text-blue-400 hover:text-blue-300">
+            <Link href="/signup" className="font-medium text-amber-300 hover:text-amber-200 underline">
               Sign up
             </Link>
           </div>
