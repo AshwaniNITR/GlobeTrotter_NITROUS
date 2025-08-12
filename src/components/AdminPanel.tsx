@@ -93,12 +93,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialData = [] }) => {
         throw new Error('Failed to fetch data');
       }
       const data = await response.json();
-      // Ensure we're working with an array
       const trips = Array.isArray(data?.trips) ? data.trips : [];
       setTravelData(trips);
     } catch (err) {
       console.error('Error fetching data:', err);
-      setTravelData([]); // Reset to empty array on error
+      setTravelData([]);
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
       setIsLoading(false);
@@ -107,16 +106,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialData = [] }) => {
 
   // Calculate statistics
   const stats = useMemo(() => {
-    if (!Array.isArray(travelData) || travelData.length === 0) {
-      return {
-        totalTrips: 0,
-        totalBudget: 0,
-        totalDays: 0,
-        avgBudget: 0,
-        avgDays: 0,
-        uniqueDestinations: 0,
-      };
-    }
+    if (!Array.isArray(travelData)) return {
+      totalTrips: 0,
+      totalBudget: 0,
+      totalDays: 0,
+      avgBudget: 0,
+      avgDays: 0,
+      uniqueDestinations: 0,
+    };
 
     const totalTrips = travelData.length;
     const totalBudget = travelData.reduce((sum, trip) => sum + (trip.totalBudget || 0), 0);
@@ -135,10 +132,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialData = [] }) => {
     };
   }, [travelData]);
 
-  // Destination data for pie chart
+  // Data processing remains the same
   const destinationData = useMemo<DestinationData[]>(() => {
     if (travelData.length === 0) return [];
-
     const destinations: Record<string, number> = {};
     travelData.forEach(trip => {
       destinations[trip.destination] = (destinations[trip.destination] || 0) + 1;
@@ -146,7 +142,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialData = [] }) => {
     return Object.entries(destinations).map(([name, value]) => ({ name, value }));
   }, [travelData]);
 
-  // Budget vs Days scatter plot data
   const budgetDaysData = useMemo<BudgetDaysData[]>(() => {
     return travelData.map((trip, index) => ({
       x: trip.totalDays,
@@ -156,10 +151,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialData = [] }) => {
     }));
   }, [travelData]);
 
-  // Timeline data
   const timelineData = useMemo<TimelineData[]>(() => {
     if (travelData.length === 0) return [];
-
     return travelData
       .map(trip => ({
         date: new Date(trip.createdAt).toLocaleDateString(),
@@ -170,10 +163,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialData = [] }) => {
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [travelData]);
 
-  // Destination budget analysis
   const destinationBudgetData = useMemo<DestinationBudgetData[]>(() => {
     if (travelData.length === 0) return [];
-
     const destBudgets: Record<string, { total: number; count: number; days: number }> = {};
     travelData.forEach(trip => {
       if (!destBudgets[trip.destination]) {
@@ -183,7 +174,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialData = [] }) => {
       destBudgets[trip.destination].count += 1;
       destBudgets[trip.destination].days += trip.totalDays;
     });
-
     return Object.entries(destBudgets).map(([destination, data]) => ({
       destination,
       avgBudget: Math.round((data.total / data.count) * 100) / 100,
@@ -193,77 +183,87 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialData = [] }) => {
     }));
   }, [travelData]);
 
-  const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#8dd1e1'];
+  // Updated color palette with purple theme
+  const COLORS = [
+  '#C084FC', // Bright purple
+  '#A855F7', // Electric purple
+  '#8B5CF6', // Vivid violet
+  '#D946EF', // Fuchsia
+  '#EC4899', // Pink
+  '#F472B6', // Hot pink
+  '#F59E0B', // Amber
+  '#FCD34D', // Yellow
+  '#34D399', // Emerald
+  '#2DD4BF'  // Teal
+];
 
-  const StatCard: React.FC<StatCardProps> = ({ icon: Icon, title, value, subtitle, color = "#3B82F6" }) => (
-    <div className="bg-white rounded-lg shadow-lg p-6 border-l-4" style={{ borderLeftColor: color }}>
-      <div className="flex items-center">
-        <Icon className="h-12 w-12 mr-4" />
-        <div>
-          <h3 className="text-lg font-semibold text-gray-700">{title}</h3>
-          <p className="text-3xl font-bold text-gray-900">{value}</p>
-          {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
-        </div>
+  const StatCard: React.FC<StatCardProps> = ({ icon: Icon, title, value, subtitle, color = "#FBBF24" }) => (
+  <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-white/20 transition-all hover:scale-[1.02] hover:shadow-xl">
+    <div className="flex items-center">
+      <div className="p-3 rounded-full bg-white/10 mr-4">
+        <Icon className="h-6 w-6 text-amber-300" />
+      </div>
+      <div>
+        <h3 className="text-sm font-medium text-amber-200">{title}</h3>
+        <p className="text-2xl font-bold text-amber-50">{value}</p>
+        {subtitle && <p className="text-xs text-amber-100/80">{subtitle}</p>}
       </div>
     </div>
-  );
+  </div>
+);
 
-  const LoadingMessage = () => (
-    <div className="bg-white rounded-lg shadow-lg p-12 text-center">
-      <div className="text-gray-400 mb-4">
-        <Clock className="h-16 w-16 mx-auto mb-4 animate-pulse" />
-        <h3 className="text-xl font-semibold text-gray-600">Loading Travel Data</h3>
-        <p className="text-gray-500 mt-2">Please wait while we fetch your travel information</p>
-      </div>
+
+const LoadingMessage = () => (
+  <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-lg p-12 text-center">
+    <div className="text-amber-200 mb-4">
+      <Clock className="h-16 w-16 mx-auto mb-4 animate-pulse text-amber-300" />
+      <h3 className="text-xl font-semibold text-amber-50">Loading Travel Data</h3>
+      <p className="text-amber-100/80 mt-2">Please wait while we fetch your travel information</p>
     </div>
-  );
+  </div>
+);
 
-  const ErrorMessage = ({ message }: { message: string }) => (
-    <div className="bg-white rounded-lg shadow-lg p-12 text-center">
-      <div className="text-red-400 mb-4">
-        <MapPin className="h-16 w-16 mx-auto mb-4" />
-        <h3 className="text-xl font-semibold text-gray-600">Error Loading Data</h3>
-        <p className="text-gray-500 mt-2">{message}</p>
-        <button
-          onClick={fetchData}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Retry
-        </button>
-      </div>
+const ErrorMessage = ({ message }: { message: string }) => (
+  <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-lg p-12 text-center">
+    <div className="text-amber-200 mb-4">
+      <MapPin className="h-16 w-16 mx-auto mb-4 text-amber-300" />
+      <h3 className="text-xl font-semibold text-amber-50">Error Loading Data</h3>
+      <p className="text-amber-100/80 mt-2">{message}</p>
+      <button
+        onClick={fetchData}
+        className="mt-4 px-4 py-2 bg-amber-400/10 text-amber-300 rounded-lg hover:bg-amber-400/20 transition-colors border border-amber-400/20"
+      >
+        Retry
+      </button>
     </div>
-  );
+  </div>
+);
 
-  const NoDataMessage = () => (
-    <div className="bg-white rounded-lg shadow-lg p-12 text-center">
-      <div className="text-gray-400 mb-4">
-        <MapPin className="h-16 w-16 mx-auto mb-4" />
-        <h3 className="text-xl font-semibold text-gray-600">No Travel Data Available</h3>
-        <p className="text-gray-500 mt-2">Start by adding some travel data to see analytics</p>
-      </div>
+const NoDataMessage = () => (
+  <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-lg p-12 text-center">
+    <div className="text-amber-200 mb-4">
+      <MapPin className="h-16 w-16 mx-auto mb-4 text-amber-300" />
+      <h3 className="text-xl font-semibold text-amber-50">No Travel Data Available</h3>
+      <p className="text-amber-100/80 mt-2">Start by adding some travel data to see analytics</p>
     </div>
-  );
+  </div>
+)
 
-  if (isLoading) {
-    return <LoadingMessage />;
-  }
-
-  if (error) {
-    return <ErrorMessage message={error} />;
-  }
+  if (isLoading) return <LoadingMessage />;
+  if (error) return <ErrorMessage message={error} />;
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-800 to-purple-700 p-4 md:p-8">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-lg mb-6 border border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <h1 className="text-3xl font-bold text-gray-900">Travel Admin Dashboard</h1>
+          <div className="flex flex-col md:flex-row justify-between items-center py-6 gap-4">
+            <h1 className="text-3xl font-bold text-white">Travel Admin Dashboard</h1>
             <div className="flex items-center space-x-4">
-              <div className="text-sm text-gray-500">Last updated: {new Date().toLocaleString()}</div>
+              <div className="text-sm text-white/60">Last updated: {new Date().toLocaleString()}</div>
               <button
                 onClick={fetchData}
-                className="px-3 py-1 bg-blue-100 text-blue-600 rounded-md text-sm hover:bg-blue-200"
+                className="px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors text-sm"
               >
                 Refresh Data
               </button>
@@ -273,7 +273,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialData = [] }) => {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="bg-white border-b">
+      <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-lg mb-6 border border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex space-x-8">
             {[
@@ -285,10 +285,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialData = [] }) => {
               <button
                 key={tab.key}
                 onClick={() => setSelectedTab(tab.key)}
-                className={`py-4 px-2 border-b-2 font-medium text-sm ${
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   selectedTab === tab.key
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                    ? 'border-purple-300 text-white'
+                    : 'border-transparent text-white/60 hover:text-white'
                 }`}
               >
                 {tab.label}
@@ -298,55 +298,64 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialData = [] }) => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto">
         {travelData.length === 0 ? (
           <NoDataMessage />
         ) : (
           <>
             {selectedTab === 'overview' && (
-              <div className="space-y-8">
+              <div className="space-y-6">
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <StatCard icon={MapPin} title="Total Trips" value={stats.totalTrips} color="#3B82F6" />
+                  <StatCard icon={MapPin} title="Total Trips" value={stats.totalTrips} color="#9F7AEA" />
                   <StatCard
                     icon={DollarSign}
                     title="Total Budget"
                     value={`₹${stats.totalBudget}`}
                     subtitle={`Avg: ₹${stats.avgBudget}/trip`}
-                    color="#10B981"
+                    color="#667EEA"
                   />
                   <StatCard
                     icon={Calendar}
                     title="Total Days"
                     value={stats.totalDays}
                     subtitle={`Avg: ${stats.avgDays} days/trip`}
-                    color="#F59E0B"
+                    color="#764BA2"
                   />
                 </div>
 
                 {/* Quick Charts */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="bg-white rounded-lg shadow-lg p-6">
-                    <h3 className="text-lg font-semibold mb-4">Budget vs Trip Duration</h3>
+                  <div className="bg-white/20 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-white/10">
+                    <h3 className="text-lg font-semibold mb-4 text-white">Budget vs Trip Duration</h3>
                     <ResponsiveContainer width="100%" height={300}>
-                      <ScatterChart data={budgetDaysData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="x" name="Days" />
-                        <YAxis dataKey="y" name="Budget" />
+                      <ScatterChart
+                        data={budgetDaysData}
+                        margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff30" />
+                        <XAxis dataKey="x" name="Days" stroke="#ffffff80" />
+                        <YAxis dataKey="y" name="Budget" stroke="#ffffff80" />
                         <Tooltip
                           cursor={{ strokeDasharray: '3 3' }}
+                          contentStyle={{
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            borderColor: '#ffffff20',
+                            borderRadius: '0.5rem',
+                            color: 'white',
+                          }}
                           formatter={(value: number, name: string) => [
                             value,
                             name === 'y' ? 'Budget (₹)' : 'Days',
                           ]}
                         />
-                        <Scatter name="Trips" data={budgetDaysData} fill="#8884d8" />
+                        <Scatter name="Trips" data={budgetDaysData} fill="#9F7AEA" />
                       </ScatterChart>
                     </ResponsiveContainer>
                   </div>
 
-                  <div className="bg-white rounded-lg shadow-lg p-6">
-                    <h3 className="text-lg font-semibold mb-4">Trips by Destination</h3>
+                  <div className="bg-white/20 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-white/10">
+                    <h3 className="text-lg font-semibold mb-4 text-white">Trips by Destination</h3>
                     <ResponsiveContainer width="100%" height={300}>
                       <PieChart>
                         <Pie
@@ -354,7 +363,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialData = [] }) => {
                           cx="50%"
                           cy="50%"
                           labelLine={false}
-                          label={({ name, percent }: { name: string; percent?: number }) =>
+                          label={({ name, percent }) =>
                             `${name} (${(percent! * 100).toFixed(0)}%)`
                           }
                           outerRadius={80}
@@ -365,7 +374,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialData = [] }) => {
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>
-                        <Tooltip />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            borderColor: '#ffffff20',
+                            borderRadius: '0.5rem',
+                            color: 'white',
+                          }}
+                        />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -375,44 +391,66 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialData = [] }) => {
 
             {selectedTab === 'destinations' && (
               <div className="space-y-6">
-                <div className="bg-white rounded-lg shadow-lg p-6">
-                  <h3 className="text-xl font-semibold mb-6">Destination Analysis</h3>
+                <div className="bg-white/20 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-white/10">
+                  <h3 className="text-xl font-semibold mb-6 text-white">Destination Analysis</h3>
                   <ResponsiveContainer width="100%" height={400}>
                     <BarChart data={destinationBudgetData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="destination" />
-                      <YAxis />
-                      <Tooltip />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#ffffff30" />
+                      <XAxis dataKey="destination" stroke="#ffffff80" />
+                      <YAxis stroke="#ffffff80" />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                          borderColor: '#ffffff20',
+                          borderRadius: '0.5rem',
+                          color: 'white',
+                        }}
+                      />
                       <Legend />
-                      <Bar dataKey="avgBudget" fill="#8884d8" name="Avg Budget (₹)" />
-                      <Bar dataKey="avgDays" fill="#82ca9d" name="Avg Days" />
+                      <Bar dataKey="avgBudget" fill="#9F7AEA" name="Avg Budget (₹)" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="avgDays" fill="#667EEA" name="Avg Days" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="bg-white rounded-lg shadow-lg p-6">
-                    <h3 className="text-lg font-semibold mb-4">Total Budget by Destination</h3>
+                  <div className="bg-white/20 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-white/10">
+                    <h3 className="text-lg font-semibold mb-4 text-white">Total Budget by Destination</h3>
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={destinationBudgetData} layout="horizontal">
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis type="number" />
-                        <YAxis dataKey="destination" type="category" width={80} />
-                        <Tooltip formatter={(value: number) => [`₹${value}`, 'Total Budget']} />
-                        <Bar dataKey="totalBudget" fill="#ffc658" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff30" />
+                        <XAxis type="number" stroke="#ffffff80" />
+                        <YAxis dataKey="destination" type="category" width={80} stroke="#ffffff80" />
+                        <Tooltip
+                          formatter={(value: number) => [`₹${value}`, 'Total Budget']}
+                          contentStyle={{
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            borderColor: '#ffffff20',
+                            borderRadius: '0.5rem',
+                            color: 'white',
+                          }}
+                        />
+                        <Bar dataKey="totalBudget" fill="#9F7AEA" radius={[0, 4, 4, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
 
-                  <div className="bg-white rounded-lg shadow-lg p-6">
-                    <h3 className="text-lg font-semibold mb-4">Trip Count by Destination</h3>
+                  <div className="bg-white/20 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-white/10">
+                    <h3 className="text-lg font-semibold mb-4 text-white">Trip Count by Destination</h3>
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={destinationBudgetData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="destination" />
-                        <YAxis />
-                        <Tooltip />
-                        <Bar dataKey="trips" fill="#ff7300" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff30" />
+                        <XAxis dataKey="destination" stroke="#ffffff80" />
+                        <YAxis stroke="#ffffff80" />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            borderColor: '#ffffff20',
+                            borderRadius: '0.5rem',
+                            color: 'white',
+                          }}
+                        />
+                        <Bar dataKey="trips" fill="#667EEA" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -422,42 +460,51 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialData = [] }) => {
 
             {selectedTab === 'budget' && (
               <div className="space-y-6">
-                <div className="bg-white rounded-lg shadow-lg p-6">
-                  <h3 className="text-xl font-semibold mb-6">Budget Timeline</h3>
+                <div className="bg-white/20 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-white/10">
+                  <h3 className="text-xl font-semibold mb-6 text-white">Budget Timeline</h3>
                   <ResponsiveContainer width="100%" height={400}>
                     <LineChart data={timelineData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <Tooltip />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#ffffff30" />
+                      <XAxis dataKey="date" stroke="#ffffff80" />
+                      <YAxis stroke="#ffffff80" />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                          borderColor: '#ffffff20',
+                          borderRadius: '0.5rem',
+                          color: 'white',
+                        }}
+                      />
                       <Legend />
                       <Line
                         type="monotone"
                         dataKey="budget"
-                        stroke="#8884d8"
+                        stroke="#9F7AEA"
                         name="Budget (₹)"
                         strokeWidth={2}
+                        dot={{ fill: '#9F7AEA', strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6, fill: '#ffffff' }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="bg-white rounded-lg shadow-lg p-6">
-                    <h4 className="font-semibold text-gray-700 mb-2">Highest Budget</h4>
-                    <p className="text-2xl font-bold text-green-600">
+                  <div className="bg-white/20 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-white/10">
+                    <h4 className="font-semibold text-white/80 mb-2">Highest Budget</h4>
+                    <p className="text-2xl font-bold text-white">
                       ₹{travelData.length > 0 ? Math.max(...travelData.map(t => t.totalBudget)) : 0}
                     </p>
                   </div>
-                  <div className="bg-white rounded-lg shadow-lg p-6">
-                    <h4 className="font-semibold text-gray-700 mb-2">Lowest Budget</h4>
-                    <p className="text-2xl font-bold text-blue-600">
+                  <div className="bg-white/20 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-white/10">
+                    <h4 className="font-semibold text-white/80 mb-2">Lowest Budget</h4>
+                    <p className="text-2xl font-bold text-white">
                       ₹{travelData.length > 0 ? Math.min(...travelData.map(t => t.totalBudget)) : 0}
                     </p>
                   </div>
-                  <div className="bg-white rounded-lg shadow-lg p-6">
-                    <h4 className="font-semibold text-gray-700 mb-2">Budget Range</h4>
-                    <p className="text-2xl font-bold text-purple-600">
+                  <div className="bg-white/20 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-white/10">
+                    <h4 className="font-semibold text-white/80 mb-2">Budget Range</h4>
+                    <p className="text-2xl font-bold text-white">
                       ₹
                       {travelData.length > 0
                         ? Math.max(...travelData.map(t => t.totalBudget)) -
@@ -471,67 +518,76 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialData = [] }) => {
 
             {selectedTab === 'timeline' && (
               <div className="space-y-6">
-                <div className="bg-white rounded-lg shadow-lg p-6">
-                  <h3 className="text-xl font-semibold mb-6">Trip Creation Timeline</h3>
+                <div className="bg-white/20 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-white/10">
+                  <h3 className="text-xl font-semibold mb-6 text-white">Trip Creation Timeline</h3>
                   <ResponsiveContainer width="100%" height={400}>
                     <LineChart data={timelineData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <Tooltip />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#ffffff30" />
+                      <XAxis dataKey="date" stroke="#ffffff80" />
+                      <YAxis stroke="#ffffff80" />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                          borderColor: '#ffffff20',
+                          borderRadius: '0.5rem',
+                          color: 'white',
+                        }}
+                      />
                       <Legend />
                       <Line
                         type="monotone"
                         dataKey="days"
-                        stroke="#82ca9d"
+                        stroke="#667EEA"
                         name="Trip Duration (Days)"
                         strokeWidth={2}
+                        dot={{ fill: '#667EEA', strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6, fill: '#ffffff' }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
 
-                <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                  <div className="px-6 py-4 border-b border-gray-200">
-                    <h3 className="text-lg font-semibold">Trip Details</h3>
+                <div className="bg-white/20 backdrop-blur-lg rounded-xl shadow-lg overflow-hidden border border-white/10">
+                  <div className="px-6 py-4 border-b border-white/10">
+                    <h3 className="text-lg font-semibold text-white">Trip Details</h3>
                   </div>
                   <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
+                    <table className="min-w-full divide-y divide-white/10">
+                      <thead className="bg-white/10">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-left text-xs font-medium text-white/80 uppercase tracking-wider">
                             Destination
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-left text-xs font-medium text-white/80 uppercase tracking-wider">
                             Start Date
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-left text-xs font-medium text-white/80 uppercase tracking-wider">
                             Duration
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-left text-xs font-medium text-white/80 uppercase tracking-wider">
                             Budget
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-left text-xs font-medium text-white/80 uppercase tracking-wider">
                             Sections
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-left text-xs font-medium text-white/80 uppercase tracking-wider">
                             User
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
+                      <tbody className="divide-y divide-white/10">
                         {travelData.map(trip => (
-                          <tr key={trip._id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{trip.destination}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <tr key={trip._id} className="hover:bg-white/5 transition-colors">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{trip.destination}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-white/80">
                               {new Date(trip.startDate).toLocaleDateString()}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{trip.totalDays} days</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹{trip.totalBudget}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-white/80">{trip.totalDays} days</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-white/80">₹{trip.totalBudget}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-white/80">
                               {Array.isArray(trip.sections) ? trip.sections.length : trip.sections}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate" title={trip.userEmail}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-white/80 truncate" title={trip.userEmail}>
                               {trip.userEmail}
                             </td>
                           </tr>
