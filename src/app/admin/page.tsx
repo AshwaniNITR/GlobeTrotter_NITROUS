@@ -2,23 +2,29 @@
 
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import AdminPanel from '@/components/AdminPanel'; // Adjust the import path as needed
 
 export default function PasswordPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
-      router.push('/admin/dashboard');
+      setIsAuthenticated(true);
     } else {
       setError('Incorrect password. Please try again.');
     }
   };
 
+  // If authenticated, show the AdminPanel
+  if (isAuthenticated) {
+    return <AdminPanel />;
+  }
+
+  // Otherwise, show the password form
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-indigo-800 to-purple-700">
       <div className="w-full max-w-md px-6 py-12">
