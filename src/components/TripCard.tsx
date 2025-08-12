@@ -1,5 +1,5 @@
 import { useRouter } from 'next/navigation';
-import { Calendar, MapPin, DollarSign, Clock } from 'lucide-react';
+import { Calendar, MapPin,  Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface TripCardProps {
@@ -111,7 +111,7 @@ export default function TripCard({ trip, status }: TripCardProps) {
         </div>
         
         <div className="flex items-center text-white/80 text-sm">
-          <DollarSign className="w-4 h-4 mr-3 text-white/60" />
+          {/* <DollarSign className="w-4 h-4 mr-3 text-white/60" /> */}
           <span>${trip.totalBudget.toLocaleString()}</span>
         </div>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
-import { FiSearch, FiPlus, FiInstagram, FiTwitter, FiLinkedin, FiGithub, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiSearch, FiPlus,  FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import TripCard from '../../components/TripCard';
@@ -33,12 +33,6 @@ const ExoticCarousel = () => {
       subtitle: "Cherry blossoms & Sacred Temples",
       image: "https://images.pexels.com/photos/1440476/pexels-photo-1440476.jpeg",
       gradient: "from-pink-400 via-purple-500 to-indigo-600"
-    },
-    {
-      title: "Alpine Paradise",
-      subtitle: "Crystal Lakes & Majestic Peaks",
-      image: "https://images.pexels.com/photos/147411/italy-mountains-clouds-sky-147411.jpeg",
-      gradient: "from-blue-400 via-teal-500 to-green-600"
     },
     {
       title: "Highland Dreams",
@@ -111,19 +105,28 @@ const ExoticCarousel = () => {
         </motion.div>
       </AnimatePresence>
       
-      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3">
-        {slides.map((_, index) => (
-          <motion.button
-            key={index}
-            onClick={() => setCurrentSlide(index)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              index === currentSlide ? 'bg-white scale-125' : 'bg-white/50'
-            }`}
-            whileHover={{ scale: 1.2 }}
-            whileTap={{ scale: 0.9 }}
-          />
-        ))}
+     <div className="relative w-full h-[500px] overflow-hidden">
+  {slides.map((slide, index) => (
+    <motion.div
+      key={index}
+      className={`absolute top-0 left-0 w-full h-full bg-cover bg-center transition-opacity duration-700 ${
+        index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
+      }`}
+      style={{ backgroundImage: `url(${slide.image})` }}
+    >
+      {/* Overlay for better text visibility */}
+     
+
+      {/* Text on top */}
+      <div className="absolute bottom-20 left-10 text-amber-400 z-20">
+        <h2 className="text-4xl font-bold">{slide.title}</h2>
+        <p className="text-lg">{slide.subtitle}</p>
       </div>
+    </motion.div>
+  ))}
+</div>
+
+
     </div>
   );
 };
@@ -158,31 +161,45 @@ const RecommendedLocationsCarousel = ({ trips }: { trips: Trip[] }) => {
     );
   };
 
-  const getLocationData = (location: string): RecommendedTrip => {
-    const existingTrip = trips.find((trip) => trip.destination === location);
-    if (existingTrip) return { ...existingTrip, isRecommended: true };
+// Store generated trip data so they stay constant
+const locationCache: Record<string, RecommendedTrip> = {};
 
-    const mockBudgets = [1500, 2000, 2500, 3000, 3500, 4000];
-    const mockDays = [5, 7, 10, 14];
+const getLocationData = (location: string): RecommendedTrip => {
+  const existingTrip = trips.find((trip) => trip.destination === location);
+  if (existingTrip) return { ...existingTrip, isRecommended: true };
 
-    return {
-      _id: `mock-${location}`,
-      destination: location,
-      startDate: new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-      endDate: new Date(Date.now() + (30 + Math.random() * 60) * 24 * 60 * 60 * 1000).toISOString(),
-      totalDays: mockDays[Math.floor(Math.random() * mockDays.length)],
-      totalBudget: mockBudgets[Math.floor(Math.random() * mockBudgets.length)],
-      sections: [
-        {
-          name: "Accommodation",
-          budget: Math.floor(Math.random() * 1000) + 500,
-          daysToStay: Math.floor(Math.random() * 5) + 3,
-          dateRange: "TBD"
-        }
-      ],
-      isRecommended: true
-    };
+  // If already generated before, return the cached value
+  if (locationCache[location]) {
+    return locationCache[location];
+  }
+
+  // Predefined mock data
+  const mockBudgets = [1500, 2000, 2500, 3000, 3500, 4000];
+  const mockDays = [5, 7, 10, 14];
+
+  const newTrip: RecommendedTrip = {
+    _id: `mock-${location}`,
+    destination: location,
+    startDate: new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+    endDate: new Date(Date.now() + (30 + Math.random() * 60) * 24 * 60 * 60 * 1000).toISOString(),
+    totalDays: mockDays[Math.floor(Math.random() * mockDays.length)],
+    totalBudget: mockBudgets[Math.floor(Math.random() * mockBudgets.length)],
+    sections: [
+      {
+        name: "Accommodation",
+        budget: Math.floor(Math.random() * 1000) + 500,
+        daysToStay: Math.floor(Math.random() * 5) + 3,
+        dateRange: "TBD"
+      }
+    ],
+    isRecommended: true
   };
+
+  // Save to cache so it doesn’t change later
+  locationCache[location] = newTrip;
+  return newTrip;
+};
+
 
   return (
     <motion.div 
@@ -314,9 +331,7 @@ const RecommendedLocationsCarousel = ({ trips }: { trips: Trip[] }) => {
 
                   <div className="p-6">
                     <div className="flex justify-between items-center mb-4">
-                      <span className="text-sm text-green-400 font-semibold">
-                        {locationData.totalDays} Days Journey
-                      </span>
+                     
                       <span className="text-sm text-yellow-400 font-semibold">
                         ${locationData.totalBudget}
                       </span>
@@ -514,7 +529,9 @@ export default function DashboardPage() {
               whileHover={{ rotate: 360 }}
               transition={{ duration: 0.6 }}
             >
-              <span className="text-white font-bold text-lg">GT</span>
+              <span className="text-white font-bold text-lg">
+                <Image src="/siteLogo.jpg" alt="Logo" width={40} height={40} />
+              </span>
             </motion.div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-pink-200 bg-clip-text text-transparent">
               GlobalTrotter

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { MapPin, Calendar, Compass, Star, Plane, ChevronDown, Check, Activity, DollarSign, Map, Loader, X, Plus } from 'lucide-react';
+import { MapPin, Calendar, Compass, Star, Plane, ChevronDown, Check, Activity,  Map, Loader, X, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function TripPlannerPage() {
@@ -519,7 +519,7 @@ export default function TripPlannerPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
-                        <DollarSign className="w-5 h-5 text-green-600" />
+                        {/* <DollarSign className="w-5 h-5 text-green-600" /> */}
                         <div>
                           <p className="text-green-800 font-bold text-lg">
                             ${totalBudget}
@@ -652,7 +652,7 @@ export default function TripPlannerPage() {
                           
                           <div className="flex items-center gap-2 mb-4">
                             <div className="flex items-center gap-1 bg-green-100 px-3 py-1 rounded-full">
-                              <DollarSign className="w-4 h-4 text-green-600" />
+                              {/* <DollarSign className="w-4 h-4 text-green-600" /> */}
                               <span className="text-green-700 font-bold text-sm">
                                 ${place.budget}
                               </span>
