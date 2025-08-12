@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { MapPin, Calendar, Compass, Star, Plane, ChevronDown, Check, Activity, DollarSign, Map, Loader } from 'lucide-react';
+import { MapPin, Calendar, Compass, Star, Plane, ChevronDown, Check, Activity, DollarSign, Map, Loader, X, Plus } from 'lucide-react';
 
 export default function TripPlannerPage() {
   type FormData = {
@@ -288,143 +287,170 @@ export default function TripPlannerPage() {
       // For Next.js: router.push('/trip-details');
       // For React Router: navigate('/trip-details');
       
-      //alert(`Trip plan created successfully!\n\nDestination: ${formData.place}\nDuration: ${numberOfDays} days\nPlaces: ${selectedPlaces.length}\nTotal Budget: ${totalBudget} USD\n\nIn your actual app, you would be redirected to the trip details page now.`);
-      router.push('/tripPlanner')
+      alert(`Trip plan created successfully!\n\nDestination: ${formData.place}\nDuration: ${numberOfDays} days\nPlaces: ${selectedPlaces.length}\nTotal Budget: ${totalBudget} USD\n\nIn your actual app, you would be redirected to the trip details page now.`);
     } catch (err) {
       console.error('Error creating trip:', err);
       setError('Failed to create trip. Please try again.');
     }
   };
-  const router=useRouter();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-slate-50 to-purple-100 relative">
-      <div className="relative z-10 max-w-6xl mx-auto px-6 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50">
+      {/* Floating Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">
-            Create a new Trip 
-          </h1>
-          <div className="flex items-center justify-center gap-2 text-slate-600">
-            <Compass className="w-5 h-5" />
-            <span className="text-xl font-semibold">GlobalTrotter</span>
+        <div className="text-center mb-8 sm:mb-12">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl shadow-lg flex items-center justify-center">
+              <Compass className="w-7 h-7 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                GlobalTrotter
+              </h1>
+              <p className="text-sm text-gray-500 font-medium">Plan Your Perfect Journey</p>
+            </div>
           </div>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3">
+            Create Your Dream Trip
+          </h2>
+          <p className="text-gray-600 max-w-2xl mx-auto text-base sm:text-lg">
+            Discover amazing destinations and create unforgettable memories with our intelligent trip planner
+          </p>
         </div>
 
         {/* Main Content Card */}
-        <div className="bg-white/80 backdrop-blur-sm border border-slate-200/50 shadow-xl rounded-lg overflow-hidden">
+        <div className="bg-white/80 backdrop-blur-lg border border-purple-100 shadow-2xl rounded-3xl overflow-hidden">
           {/* Card Header */}
-          <div className="bg-gradient-to-r from-purple-100/50 to-slate-100/50 border-b border-slate-200/50 p-6">
-            <div className="flex items-center gap-2 mb-2">
-              <MapPin className="w-6 h-6 text-purple-600" />
-              <h2 className="text-2xl font-semibold text-slate-800">Plan a new trip</h2>
-            </div>
-
-            {/* Suggest Button */}
-            <div className="flex justify-center mb-8">
+          <div className="bg-gradient-to-r from-purple-100/80 to-pink-100/80 border-b border-purple-100 p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl shadow-lg flex items-center justify-center">
+                  <MapPin className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-800">Plan Your Adventure</h3>
+                  <p className="text-gray-600 text-sm">Fill in the details to get personalized recommendations</p>
+                </div>
+              </div>
+              
+              {/* Get Suggestions Button */}
               <button 
                 onClick={handleSuggestClick}
                 disabled={!formData.place.trim() || isLoading}
-                className="px-6 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"
+                className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 transform hover:scale-105 disabled:hover:scale-100"
               >
                 {isLoading ? (
-                  <Loader className="w-4 h-4 animate-spin" />
+                  <Loader className="w-5 h-5 animate-spin" />
                 ) : (
-                  <Star className="w-4 h-4" />
+                  <Star className="w-5 h-5" />
                 )}
-                {isLoading ? 'Getting Suggestions...' : 'Get Suggestions'}
+                {isLoading ? 'Getting Suggestions...' : 'Get AI Suggestions'}
               </button>
             </div>
-            <p className="text-slate-600">Fill in the details to plan your perfect getaway</p>
           </div>
           
           {/* Card Content */}
-          <div className="p-8">
+          <div className="p-6 sm:p-8">
             {/* Trip Planning Form */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-12">
-              <div className="space-y-2">
-                <label htmlFor="startDate" className="block text-slate-700 font-medium text-sm">
-                  Start Date:
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mb-8">
+              <div className="space-y-3">
+                <label htmlFor="startDate" className="block text-gray-700 font-semibold text-sm">
+                  Start Date *
                 </label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-purple-400" />
                   <input
                     id="startDate"
                     type="date"
                     value={formData.startDate}
-                    min={new Date().toISOString().split("T")[0]} // Prevent past dates
+                    min={new Date().toISOString().split("T")[0]}
                     onChange={(e) => {
                       handleInputChange('startDate', e.target.value);
-                      // If endDate is before new startDate, reset endDate
                       if (formData.endDate && e.target.value > formData.endDate) {
                         setFormData(prev => ({ ...prev, endDate: "" }));
                       }
                     }}
-                    className="w-full pl-10 pr-3 py-2 text-black bg-slate-50/50 border border-slate-200 rounded-md focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 focus:outline-none transition-colors"
+                    className="w-full pl-12 pr-4 py-4 text-gray-800 bg-gray-50/50 border-2 border-gray-200 rounded-xl focus:border-purple-400 focus:ring-4 focus:ring-purple-400/20 focus:outline-none transition-all duration-200 text-base"
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label htmlFor="endDate" className="block text-slate-700 font-medium text-sm">
-                  End Date:
+              <div className="space-y-3">
+                <label htmlFor="endDate" className="block text-gray-700 font-semibold text-sm">
+                  End Date *
                 </label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-purple-400" />
                   <input
                     id="endDate"
                     type="date"
                     value={formData.endDate}
-                    min={formData.startDate || new Date().toISOString().split("T")[0]} // End date can't be before start date
-                    disabled={!formData.startDate} // Disable until start date is picked
+                    min={formData.startDate || new Date().toISOString().split("T")[0]}
+                    disabled={!formData.startDate}
                     onChange={(e) => handleInputChange('endDate', e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 text-black bg-slate-50/50 border border-slate-200 rounded-md focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 focus:outline-none transition-colors"
+                    className="w-full pl-12 pr-4 py-4 text-gray-800 bg-gray-50/50 border-2 border-gray-200 rounded-xl focus:border-purple-400 focus:ring-4 focus:ring-purple-400/20 focus:outline-none transition-all duration-200 text-base disabled:bg-gray-100 disabled:cursor-not-allowed"
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label htmlFor="place" className="block text-slate-700 font-medium text-sm">
-                  Select a Place:
+              <div className="space-y-3">
+                <label htmlFor="place" className="block text-gray-700 font-semibold text-sm">
+                  Destination *
                 </label>
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-purple-400" />
                   <input
                     id="place"
                     type="text"
-                    placeholder="Enter destination"
+                    placeholder="Where do you want to go?"
                     value={formData.place}
                     onChange={(e) => handleInputChange('place', e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 text-black bg-slate-50/50 border border-slate-200 rounded-md focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 focus:outline-none transition-colors"
+                    className="w-full pl-12 pr-4 py-4 text-gray-800 bg-gray-50/50 border-2 border-gray-200 rounded-xl focus:border-purple-400 focus:ring-4 focus:ring-purple-400/20 focus:outline-none transition-all duration-200 text-base placeholder-gray-400"
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="block text-slate-700 font-medium text-sm">
-                  Activities:
+              <div className="space-y-3">
+                <label className="block text-gray-700 font-semibold text-sm">
+                  Activities & Interests
                 </label>
                 <div className="relative">
-                  <Activity className="absolute left-3 top-3 w-4 h-4 text-slate-400 z-10" />
+                  <Activity className="absolute left-4 top-4 w-5 h-5 text-purple-400 z-10" />
                   <div
-                    className="w-full pl-10 pr-10 py-2 bg-slate-50/50 border border-slate-200 rounded-md focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 cursor-pointer transition-colors min-h-[40px] flex items-center"
+                    className="w-full pl-12 pr-12 py-4 bg-gray-50/50 border-2 border-gray-200 rounded-xl focus:border-purple-400 focus:ring-4 focus:ring-purple-400/20 cursor-pointer transition-all duration-200 min-h-[56px] flex items-center"
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   >
                     <div className="flex-1">
                       {formData.activities.length === 0 ? (
-                        <span className="text-slate-400">Select activities...</span>
+                        <span className="text-gray-400 text-base">Select your interests...</span>
                       ) : (
-                        <div className="flex flex-wrap gap-1">
+                        <div className="flex flex-wrap gap-2">
                           {formData.activities.slice(0, 2).map((activity) => (
                             <span
                               key={activity}
-                              className="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full"
+                              className="inline-flex items-center gap-1 bg-purple-100 text-purple-800 text-sm px-3 py-1 rounded-full font-medium"
                             >
                               {activity}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleActivityToggle(activity);
+                                }}
+                                className="hover:bg-purple-200 rounded-full p-0.5 transition-colors"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
                             </span>
                           ))}
                           {formData.activities.length > 2 && (
-                            <span className="inline-block bg-slate-100 text-slate-600 text-xs px-2 py-1 rounded-full">
+                            <span className="inline-block bg-gray-100 text-gray-600 text-sm px-3 py-1 rounded-full font-medium">
                               +{formData.activities.length - 2} more
                             </span>
                           )}
@@ -432,24 +458,26 @@ export default function TripPlannerPage() {
                       )}
                     </div>
                   </div>
-                  <ChevronDown className={`absolute right-3 top-3 w-4 h-4 text-slate-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`absolute right-4 top-4 w-5 h-5 text-purple-400 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
                   
                   {isDropdownOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
-                      {activityOptions.map((activity) => (
-                        <div
-                          key={activity}
-                          className="flex items-center px-3 py-2 hover:bg-slate-50 cursor-pointer"
-                          onClick={() => handleActivityToggle(activity)}
-                        >
-                          <div className={`w-4 h-4 border border-slate-300 rounded flex items-center justify-center mr-3 ${formData.activities.includes(activity) ? 'bg-purple-600 border-purple-600' : ''}`}>
-                            {formData.activities.includes(activity) && (
-                              <Check className="w-3 h-3 text-white" />
-                            )}
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-purple-100 rounded-xl shadow-2xl z-50 max-h-64 overflow-y-auto">
+                      <div className="p-2">
+                        {activityOptions.map((activity) => (
+                          <div
+                            key={activity}
+                            className="flex items-center px-4 py-3 hover:bg-purple-50 cursor-pointer rounded-lg transition-colors"
+                            onClick={() => handleActivityToggle(activity)}
+                          >
+                            <div className={`w-5 h-5 border-2 border-purple-300 rounded-md flex items-center justify-center mr-3 transition-all ${formData.activities.includes(activity) ? 'bg-purple-600 border-purple-600' : ''}`}>
+                              {formData.activities.includes(activity) && (
+                                <Check className="w-3 h-3 text-white" />
+                              )}
+                            </div>
+                            <span className="text-gray-700 text-sm font-medium">{activity}</span>
                           </div>
-                          <span className="text-slate-700 text-sm">{activity}</span>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -458,33 +486,44 @@ export default function TripPlannerPage() {
 
             {/* Trip Duration and Budget Summary */}
             {(numberOfDays > 0 || selectedPlaces.length > 0) && (
-              <div className="mb-8 p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
-                <div className="flex items-center gap-2 mb-3">
-                  <Calendar className="w-5 h-5 text-blue-600" />
-                  <h3 className="text-lg font-semibold text-blue-800">Trip Summary</h3>
+              <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                    <Calendar className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-blue-800">Trip Overview</h3>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {numberOfDays > 0 && (
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-blue-600" />
-                      <span className="text-blue-800 font-medium">
-                        Duration: {numberOfDays} {numberOfDays === 1 ? 'day' : 'days'}
-                      </span>
+                    <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
+                      <Calendar className="w-5 h-5 text-blue-600" />
+                      <div>
+                        <p className="text-blue-800 font-bold text-lg">
+                          {numberOfDays} {numberOfDays === 1 ? 'Day' : 'Days'}
+                        </p>
+                        <p className="text-blue-600 text-sm">Duration</p>
+                      </div>
                     </div>
                   )}
                   {selectedPlaces.length > 0 && (
                     <>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-purple-600" />
-                        <span className="text-purple-800 font-medium">
-                          Places: {selectedPlaces.length} selected
-                        </span>
+                      <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
+                        <MapPin className="w-5 h-5 text-purple-600" />
+                        <div>
+                          <p className="text-purple-800 font-bold text-lg">
+                            {selectedPlaces.length} Places
+                          </p>
+                          <p className="text-purple-600 text-sm">Selected</p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="w-4 h-4 text-green-600" />
-                        <span className="text-green-800 font-medium">
-                          Budget: ${totalBudget} USD
-                        </span>
+                      <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
+                        <DollarSign className="w-5 h-5 text-green-600" />
+                        <div>
+                          <p className="text-green-800 font-bold text-lg">
+                            ${totalBudget}
+                          </p>
+                          <p className="text-green-600 text-sm">Total Budget</p>
+                        </div>
                       </div>
                     </>
                   )}
@@ -494,56 +533,74 @@ export default function TripPlannerPage() {
 
             {/* Selected Places Details */}
             {selectedPlaces.length > 0 && (
-              <div className="mb-8 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
-                <div className="flex items-center gap-2 mb-3">
-                  <Check className="w-5 h-5 text-green-600" />
-                  <h3 className="text-lg font-semibold text-green-800">
-                    Selected Places ({selectedPlaces.length})
+              <div className="mb-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                    <Check className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-green-800">
+                    Selected Destinations ({selectedPlaces.length})
                   </h3>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-3">
                   {selectedPlaces.map((place, index) => (
-                    <span
+                    <div
                       key={index}
-                      className="inline-block bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full"
+                      className="inline-flex items-center gap-2 bg-white/80 text-green-800 text-sm px-4 py-2 rounded-xl font-medium shadow-sm border border-green-200"
                     >
-                      {place.name} - ${place.budget}
-                    </span>
+                      <MapPin className="w-4 h-4" />
+                      <span>{place.name}</span>
+                      <span className="text-green-600 font-bold">${place.budget}</span>
+                    </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Error Display */}
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-xl">
+                <div className="flex items-center gap-2">
+                  <X className="w-5 h-5 text-red-500" />
+                  <p className="text-red-700 font-medium">{error}</p>
                 </div>
               </div>
             )}
 
             {/* Suggestions Section */}
             <div>
-              <div className="flex items-center gap-2 mb-6">
-                <Star className="w-5 h-5 text-purple-600" />
-                <h3 className="text-xl font-semibold text-slate-800">
-                  Suggested Places to Visit
-                </h3>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+                    <Star className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-800">
+                      Discover Amazing Places
+                    </h3>
+                    <p className="text-gray-600 text-sm">Click on places to add them to your trip</p>
+                  </div>
+                </div>
                 {selectedPlaces.length > 0 && (
-                  <span className="text-sm text-slate-600">
-                    (Click to select/deselect)
-                  </span>
+                  <div className="text-sm text-purple-600 font-medium bg-purple-50 px-3 py-1 rounded-full">
+                    {selectedPlaces.length} selected
+                  </div>
                 )}
               </div>
-
-              {error && (
-                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-                  <p className="text-red-600 text-sm">{error}</p>
-                </div>
-              )}
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {isLoading ? (
                   // Loading skeleton
                   Array(6).fill(null).map((_, index) => (
-                    <div key={index} className="h-64 bg-slate-100 border border-slate-200 rounded-lg animate-pulse">
-                      <div className="h-32 bg-slate-200 rounded-t-lg"></div>
-                      <div className="p-4 space-y-2">
-                        <div className="h-4 bg-slate-200 rounded w-3/4"></div>
-                        <div className="h-3 bg-slate-200 rounded w-1/2"></div>
-                        <div className="h-3 bg-slate-200 rounded w-2/3"></div>
+                    <div key={index} className="h-80 bg-gray-100 border-2 border-gray-200 rounded-2xl animate-pulse overflow-hidden">
+                      <div className="h-48 bg-gray-200"></div>
+                      <div className="p-4 space-y-3">
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                        <div className="flex gap-2">
+                          <div className="h-6 bg-gray-200 rounded-full w-16"></div>
+                          <div className="h-6 bg-gray-200 rounded-full w-20"></div>
+                        </div>
                       </div>
                     </div>
                   ))
@@ -554,62 +611,65 @@ export default function TripPlannerPage() {
                       <div 
                         key={index}
                         onClick={() => handlePlaceSelection(place)}
-                        className={`bg-white border-2 rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer group overflow-hidden relative ${
+                        className={`bg-white border-2 rounded-2xl hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer group overflow-hidden relative transform ${
                           isSelected 
-                            ? 'border-green-500 shadow-lg ring-2 ring-green-200' 
-                            : 'border-slate-200 hover:border-purple-300'
+                            ? 'border-green-400 shadow-xl ring-4 ring-green-200/50 scale-105' 
+                            : 'border-gray-200 hover:border-purple-300'
                         }`}
                       >
                         {/* Selection indicator */}
                         {isSelected && (
-                          <div className="absolute top-2 right-2 z-10 bg-green-500 rounded-full p-1">
+                          <div className="absolute top-3 right-3 z-10 bg-green-500 rounded-full p-2 shadow-lg">
                             <Check className="w-4 h-4 text-white" />
                           </div>
                         )}
 
-                        <div className="h-32 overflow-hidden">
+                        <div className="h-48 overflow-hidden relative">
                           {place.image_url ? (
                             <img 
                               src={place.image_url} 
                               alt={place.name}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
                                 target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjZjFmNWY5Ii8+CjxwYXRoIGQ9Im0xNSA5LTYgNi02LTYiIHN0cm9rZT0iIzk0YTNiOCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+';
                               }}
                             />
                           ) : (
-                            <div className="w-full h-full bg-slate-100 flex items-center justify-center">
-                              <Map className="w-8 h-8 text-slate-400" />
+                            <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
+                              <Map className="w-12 h-12 text-purple-400" />
                             </div>
                           )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                         </div>
                         
-                        <div className="p-4">
-                          <h4 className="font-semibold text-slate-800 text-sm mb-2 line-clamp-1">
+                        <div className="p-5">
+                          <h4 className="font-bold text-gray-800 text-lg mb-3 line-clamp-2">
                             {place.name}
                           </h4>
                           
-                          <div className="flex items-center gap-1 mb-3">
-                            <DollarSign className="w-4 h-4 text-green-600" />
-                            <span className="text-green-600 font-medium text-sm">
-                              ${place.budget} USD
-                            </span>
+                          <div className="flex items-center gap-2 mb-4">
+                            <div className="flex items-center gap-1 bg-green-100 px-3 py-1 rounded-full">
+                              <DollarSign className="w-4 h-4 text-green-600" />
+                              <span className="text-green-700 font-bold text-sm">
+                                ${place.budget}
+                              </span>
+                            </div>
                           </div>
                           
                           <div className="space-y-2">
-                            <p className="text-xs text-slate-600 font-medium">Activities:</p>
-                            <div className="flex flex-wrap gap-1">
+                            <p className="text-xs text-gray-600 font-semibold uppercase tracking-wide">Activities</p>
+                            <div className="flex flex-wrap gap-2">
                               {place.activities.slice(0, 2).map((activity, idx) => (
                                 <span
                                   key={idx}
-                                  className="inline-block bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full"
+                                  className="inline-block bg-purple-100 text-purple-700 text-xs px-3 py-1 rounded-full font-medium"
                                 >
                                   {activity}
                                 </span>
                               ))}
                               {place.activities.length > 2 && (
-                                <span className="inline-block bg-slate-100 text-slate-600 text-xs px-2 py-1 rounded-full">
+                                <span className="inline-block bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full font-medium">
                                   +{place.activities.length - 2}
                                 </span>
                               )}
@@ -617,10 +677,10 @@ export default function TripPlannerPage() {
                           </div>
                         </div>
 
-                        {/* Select indicator overlay */}
-                        <div className={`absolute inset-0 pointer-events-none transition-opacity duration-200 ${
+                        {/* Selection overlay */}
+                        <div className={`absolute inset-0 pointer-events-none transition-opacity duration-300 ${
                           isSelected ? 'opacity-10' : 'opacity-0'
-                        } bg-green-500`} />
+                        } bg-green-500 rounded-2xl`} />
                       </div>
                     );
                   })
@@ -629,17 +689,18 @@ export default function TripPlannerPage() {
                   Array(6).fill(null).map((_, index) => (
                     <div 
                       key={index}
-                      className="h-48 bg-gradient-to-br from-slate-50 to-purple-50/30 border border-slate-200/50 rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer group"
+                      className="h-80 bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-dashed border-purple-200 rounded-2xl hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer group flex items-center justify-center"
                     >
-                      <div className="h-full flex items-center justify-center p-6">
-                        <div className="text-center">
-                          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-200 to-slate-200 flex items-center justify-center group-hover:from-purple-300 group-hover:to-slate-300 transition-all duration-300">
-                            <Plane className="w-8 h-8 text-purple-600" />
-                          </div>
-                          <p className="text-slate-500 text-sm font-medium">
-                            Click Get Suggestions to see recommendations
-                          </p>
+                      <div className="text-center p-6">
+                        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-purple-200 to-pink-200 flex items-center justify-center group-hover:from-purple-300 group-hover:to-pink-300 transition-all duration-300 shadow-lg">
+                          <Plane className="w-8 h-8 text-purple-600" />
                         </div>
+                        <p className="text-purple-600 text-sm font-semibold mb-1">
+                          Discover Amazing Places
+                        </p>
+                        <p className="text-gray-500 text-xs">
+                          Click "Get AI Suggestions" to see recommendations
+                        </p>
                       </div>
                     </div>
                   ))
@@ -648,13 +709,14 @@ export default function TripPlannerPage() {
             </div>
 
             {/* Action Button */}
-            <div className="flex justify-center mt-8">
+            <div className="flex justify-center mt-12">
               <button 
                 onClick={handleCreateTrip}
-                className="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"
+                disabled={!formData.startDate || !formData.endDate || !formData.place || selectedPlaces.length === 0}
+                className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-bold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 flex items-center gap-3 text-lg transform hover:scale-105 disabled:hover:scale-100"
               >
-                <Plane className="w-5 h-5" />
-                Create Trip Plan
+                <Plane className="w-6 h-6" />
+                Create My Dream Trip
               </button>
             </div>
           </div>
