@@ -71,7 +71,7 @@ pip install -r requirements.txt
 
 ### 3. To run the project:
 ```bash
-npn run dev
+npm run dev
 ```
 ## Hackathon Highlights
 
