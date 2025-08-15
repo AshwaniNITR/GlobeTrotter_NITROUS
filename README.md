@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌍 GlobeTrotter – Intelligent Travel Itinerary Planner
 
-## Getting Started
+**GlobeTrotter** is a personalized, intelligent, and collaborative platform for creating, managing, and sharing travel itineraries.  
+Built during the **Odoo Hackathon 2025** on the "GlobeTrotter – Empowering Personalized Travel Planning" problem statement, it enables users to plan multi-city trips, explore activities, stay within budget, and visualize journeys in a seamless end-to-end experience.
 
-First, run the development server:
+---
 
+## 🚀 Features
+
+### 🖥️ Web Platform
+- **Landing Page** – Modern UI introducing the platform and its value proposition.
+- **Authentication** – User registration & login with **JWT-based authentication**.
+- **Dashboard** – Personalized trip overview, recent trips, suggested destinations.
+- **Itinerary Creator** – Add destinations, stops, dates, activities, and reorder trips interactively.
+- **Trip Suggestion Engine** – AI-powered recommendations for destinations, budgets, and activities.
+- **Travel Calendar** – Visual representation of the trip timeline.
+- **Activity Selection Page** – Filter and add activities to specific destinations.
+- **Trip View Page** – View detailed itineraries with budgets, images, and activities.
+- **Admin Panel** – CRM dashboard for user & trip analytics, engagement metrics, and content moderation.
+- **User Profile Page** – Manage account details, saved destinations, and preferences.
+
+### 🤖 AI & APIs
+- **OpenAI API** – LLM-driven itinerary suggestions, budget predictions, and activity recommendations via chat prompts.
+- **Google Places API** – Fetches real-time POIs (Points of Interest) to ground AI recommendations in actual data.
+- **SERP API** – Retrieves high-quality images of recommended places.
+- **Hybrid Stack** – TypeScript for web development, Python for AI-driven backend services.
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+- **TypeScript**, **React.js** (Next.js App Router)
+- **TailwindCSS** for styling
+- **React Query** for API data fetching
+
+### Backend
+- **Python (Flask)** for AI integration services
+- **Node.js / Next.js API routes** for web backend
+- **PostgreSQL** for storing user profiles, trips, and activities
+- **JWT** for secure authentication
+
+### APIs & Services
+- **OpenAI API** – AI itinerary generation
+- **Google Places API** – Real-time location and POI data
+- **SERP API** – Place images
+- **REST & GraphQL** endpoints for frontend integration
+
+---
+
+## ⚙️ Setup & Installation
+
+### Prerequisites
+- Node.js 18+
+- Python 3.10+
+- Google Places API Key
+- SERP API Key
+- OpenAI API Key
+
+### 1. Clone Repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/Rishi2003Das/GlobeTrotter.git
+cd globetrotter
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install requirements
+```bash
+npm install
+pip install -r requirements.txt
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. To run the project:
+```bash
+npn run dev
+```
+## Hackathon Highlights
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Real-time data grounding – Google Places ensures accuracy.
 
-## Learn More
+- AI-powered personalisation – OpenAI LLM tailors trips based on preferences.
 
-To learn more about Next.js, take a look at the following resources:
+- Visual appeal – SERP API images make itineraries more engaging.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- End-to-end flow – From landing page to full itinerary visualisation.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deployed version
+- Deployed on VERCEL - https://globe-trotter-nitrous.vercel.app/
+- Demo video - https://drive.google.com/file/d/1507H7ckTVyKEK1FmQmIzAZdatwuiWDxW/view?usp=sharing
 
-## Deploy on Vercel
+## Contributors
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**TEAM NITROUS**
+- Pratiki
+- Rishi
+- Ashwani
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
