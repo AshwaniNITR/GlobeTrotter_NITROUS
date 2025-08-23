@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const protectedRoutes = ['/iota'];
+const protectedRoutes = ['/dashboard','/cardHistory','/createTravel','/detailPage','/tripPlanner','/communitySection','/userProfile'];
 
 export default async function middleware(request: NextRequest) {
   if (protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route))) {
@@ -33,5 +33,5 @@ export default async function middleware(request: NextRequest) {
 }
 //change iota to dashboard
 export const config = {
-  matcher: ['/iota']
+  matcher: ['/dashboard','/cardHistory','/createTravel','/detailPage','/tripPlanner','/communitySection','/userProfile']
 };
