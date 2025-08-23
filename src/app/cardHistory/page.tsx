@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { FiSearch, FiFilter, FiCalendar, FiMapPin, FiDollarSign, FiClock, FiChevronRight } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link'
 
 interface Trip {
   _id: string;
@@ -101,7 +102,7 @@ const EnhancedTripCard = ({ trip, status }: { trip: Trip; status: 'ongoing' | 'u
         boxShadow: "0 25px 50px rgba(0,0,0,0.25)"
       }}
       whileTap={{ scale: 0.98 }}
-      onClick={() => router.push(`/trip/${trip._id}`)}
+      onClick={() => router.push(`/detailPage?query=${trip.destination}`)}
       layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -196,7 +197,7 @@ const EnhancedTripCard = ({ trip, status }: { trip: Trip; status: 'ongoing' | 'u
           className="flex items-center justify-between pt-4 border-t border-white/10"
           whileHover={{ x: 5 }}
         >
-          <span className="text-white/80 font-medium">View Details</span>
+          <Link href={`/detailPage?query=${trip.destination}`} className="text-white/80 font-medium">View Details</Link>
           <FiChevronRight className="text-white/60 group-hover:text-white transition-colors" />
         </motion.div>
       </div>

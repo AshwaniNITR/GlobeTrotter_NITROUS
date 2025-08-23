@@ -1,6 +1,7 @@
 import { useRouter } from 'next/navigation';
 import { Calendar, MapPin,  Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 interface TripCardProps {
   trip: {
@@ -56,7 +57,7 @@ export default function TripCard({ trip, status }: TripCardProps) {
   };
 
   const handleCardClick = () => {
-    router.push(`/trip/${trip._id}`);
+    router.push(`/detailPage?query=${trip.destination}`);
   };
 
   return (
@@ -118,12 +119,7 @@ export default function TripCard({ trip, status }: TripCardProps) {
 
       {/* Action Area */}
       <div className="flex items-center justify-between pt-4 border-t border-white/10">
-        <motion.span
-          className={`text-sm font-medium ${statusColors[status].accent} group-hover:underline`}
-          whileHover={{ x: 5 }}
-        >
-          View Details
-        </motion.span>
+       <Link href={`/detailPage?query=${trip.destination}`} className="text-white/80 font-medium">View Details</Link>
         
         <motion.div
           className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center"
